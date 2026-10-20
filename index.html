@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="description" content="Logic Lab: JavaScript practice with live loop tables, real-world problems and interview mode.">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Logic Lab</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -86,6 +87,7 @@ pre.cb{font:13px/1.55 var(--mono);background:var(--bg);border:1px solid var(--ln
 </style>
 </head>
 <body>
+<noscript><p style="padding:12px">Logic Lab needs JavaScript enabled.</p></noscript>
 <header class="top"><h1>Logic Lab</h1><p>Write code, see the output, and watch every loop run step by step in a live table.</p></header>
 <nav class="tabs" id="pgn" aria-label="Sections"><button data-p="1" class="on">Practice (225)</button><button data-p="2">Concepts</button><button data-p="3">JS Basics</button></nav>
 <div class="wrap" id="pg1">
@@ -100,7 +102,7 @@ pre.cb{font:13px/1.55 var(--mono);background:var(--bg);border:1px solid var(--ln
 <nav class="tabs" id="mt"><button data-t="out" class="on">Output</button><button data-t="guide">Interview Guide</button></nav>
 <section id="res"></section>
 </main>
-<section class="rp"><nav class="tabs" id="rt"><button data-t="tbl" class="on">Loop Table</button><button data-t="map">Mind Map</button></nav>
+<section class="rp"><nav class="tabs" id="rt"><button data-t="tbl" class="on">Loop Table</button><button data-t="map">Mind Map</button><button data-t="mat">Matrix</button></nav>
 <div class="pc" id="pc"><button class="b" id="pl">▶ Replay</button><button class="b" id="sk">Show all</button><span id="sc"></span></div>
 <div id="st"></div><div id="rv"></div></section>
 </div>
@@ -286,7 +288,7 @@ function right(){
   $("#st").innerHTML=r.ev.length?`<span>Max nesting: <b>${md}</b></span> `+Object.entries(m).map(([k,v])=>`<span class="c">${esc(k)} ran <b>${v}×</b></span>`).join(""):"";
   $("#pc").style.display=rtab==="tbl"&&r.ev.length?"flex":"none";
   if(!r.ev.length){$("#rv").innerHTML=empty("No loop or function found in this code. Write a loop and every iteration will appear here as a row, with variables as columns.");return}
-  rtab==="tbl"?tbl():mmap();
+  rtab==="tbl"?tbl():rtab==="mat"?mat():mmap();
   if(r.cut)$("#rv").insertAdjacentHTML("beforeend",empty("Recording stopped after 3000 steps."));
 }
 
@@ -458,6 +460,218 @@ function prog(){const n=Object.keys(done).length;document.querySelector("#pbar i
 const _side=side;side=function(){_side();prog()};
 const _rr=renderRef;renderRef=function(){_rr();document.querySelectorAll(".cd").forEach((c,i)=>{c.style.animationDelay=Math.min(i*40,600)+"ms"})};
 prog();
+</script>
+<script>
+/* ===== Batch 3: Real-World 100, 2D Loops, My Logic, Interview, Timer UI, Date/Types ===== */
+document.head.insertAdjacentHTML("beforeend",`<style>
+.tm{background:var(--pn);border:1px solid var(--ln);border-radius:14px;padding:5px 8px 5px 14px;gap:8px}
+#tm{font:700 26px/1 var(--mono);letter-spacing:.02em;min-width:84px;padding:4px 0}
+.tm.go #tm{color:var(--d2)}#tm.late{color:var(--er)}
+.tm.go::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--d2);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.25}}
+#tp{background:var(--ac);color:var(--bg);border-color:var(--ac);font-weight:700;min-width:72px}
+#pgx{padding:8px 22px 28px}.xg{display:grid;grid-template-columns:280px minmax(0,1fr);gap:16px}
+.xs{background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:8px;max-height:84vh;overflow:auto;position:sticky;top:8px;align-self:start}
+.xs summary{cursor:pointer;font-weight:700;padding:5px 4px;font-size:13.5px}
+.xs button{display:block;width:100%;text-align:left;background:none;border:0;border-left:3px solid transparent;color:var(--ink);font:inherit;font-size:13px;padding:3px 6px;cursor:pointer}
+.xs button.on{border-left-color:var(--ac);background:var(--bg);font-weight:700}.xs button.ok{color:var(--d2)}
+.dm{display:inline-block;font:700 11px var(--mono);padding:1px 7px;border-radius:9px;background:var(--bg);border:1px solid var(--ln);color:var(--ac)}
+#rwe,#ive{width:100%;height:260px;resize:vertical;padding:12px;border:1px solid var(--ln);border-radius:10px;background:var(--pn);color:var(--ink);font:14px/1.55 var(--mono)}
+#rsl{background:var(--pn);border:1px solid var(--ln);border-left:4px solid var(--d1);border-radius:8px;padding:8px 12px;margin-top:8px}#rsl .tabs{margin-top:0}
+.mxg{display:inline-grid;gap:4px;margin:6px 12px 6px 0}
+.mxc{width:46px;height:40px;display:flex;align-items:center;justify-content:center;border:1px solid var(--ln);border-radius:6px;font:600 13px var(--mono);background:var(--bg);transition:background .25s,transform .25s}
+.mxc.v{background:color-mix(in srgb,var(--d0) 22%,var(--pn))}.mxc.cur{background:var(--d3);color:#fff;transform:scale(1.14)}
+.mxm{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:4px}
+.mxm div{border:1px solid var(--ln);border-radius:6px;padding:2px 6px;font:12px var(--mono);min-height:38px}.mxm div.f{background:color-mix(in srgb,var(--d2) 18%,var(--pn))}.mxm b{display:block;color:var(--mu);font-weight:400}
+.ct{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0}.ct label{font-size:13px;color:var(--mu)}.ct input{width:56px}
+.ct input,.ct select{padding:5px 6px;border:1px solid var(--ln);border-radius:6px;background:var(--pn);color:var(--ink);font:inherit}
+.lv{font:700 22px var(--mono);color:var(--ac)}
+@media(max-width:900px){.xg{grid-template-columns:1fr}.xs{position:static;max-height:240px}#pgx{padding:8px 12px 24px}}
+</style>`);
+let mxt,it,rn=1,rt=0,rs=Date.now(),rsh=false,iq=null,i0=0;
+const J=(k,d)=>{try{return JSON.parse(LS.get(k)||d)}catch(e){return JSON.parse(d)}};
+let rwD=J("ll:rwd","{}"),my=J("ll:my","{}"),iv=J("ll:iv","[]");
+const LV=["Basic Array & Object","Array ke andar Object","Array mein Update / Delete","Nested Object Update","Nested Array Update","Object ke andar Array","Nested Array + Object","Real-Time Applications","Advanced Operations","Interview-Level Challenges"];
+const DOM=["Product","Stock","Healthcare","Dating","Movie Streaming"];
+const RWT=("Show all product names|Count total stocks in portfolio|Find patient by id|Show all profile names|Count movies of one genre|Add a product to cart|Get latest price of a stock|Check if patient takes any medicine|Find the oldest profile|Get top-rated movie title|"+
+"Filter in-stock products|Stocks priced above 1500|Patients with high BP|Profiles from the same city|Movies rated above 8|Sort products by price (low to high)|Total portfolio value|Average patient age|Profiles who like music|Total views of all movies|"+
+"Reduce stock after purchase|Update stock price without mutation|Discharge (delete) patient by id|Unmatch (remove) a profile|Add movie to watchlist without duplicates|Remove product from cart|Sell shares (reduce qty, drop if zero)|Mark patient as critical|Block a profile|Remove movie from watchlist|"+
+"Update product price in nested pricing|Update exchange info inside stock|Update patient BP in vitals|Update profile preferences|Update movie rating summary|Add nested discount to product|Change stock alert settings|Add a new vital to patient|Update profile location|Change streaming quality settings|"+
+"Add review to product reviews|Append price to stock history|Add prescription to patient history|Add message to match chat|Add episode to a season|Edit one review text|Remove oldest history price|Update one medicine dosage|Mark chat messages as read|Mark episode as watched|"+
+"Group products by category|Index stocks by symbol|Group patients by age band|Group profiles by city|Group movies by genre|Count tags per product|Best and worst performing stock|Patients per medicine|Mutual likes between two profiles|Count cast appearances|"+
+"Flatten orders to line items|Revenue per order list|Trades to net position|Latest diagnosis from patient visits|Unread count per user from chats|Cart total with coupon|Portfolio gain or loss from history|Doctor schedule conflict check|Recommend profiles by common likes|Continue-watching list from progress|"+
+"Shopping cart with totals|Live stock ticker with setInterval|Appointment slot booking|Swipe deck (like or pass)|Watchlist and continue watching|Search box with debounce|Low-stock alert system|Medicine reminder scheduler|Match score algorithm|Recommend movies by genre|"+
+"Normalize products to byId and allIds|Moving average of stock prices|Merge duplicate patient records|Paginate profiles|Top K movies by views|Merge inventory with conflict rule|Detect stock price spike|Anonymize patient data|Undo and redo for cart|Rank movies by weighted score|"+
+"Cart with stackable discount rules|Order-book matcher for stocks|Patient triage priority queue|Mutual match detector|LRU for recently watched movies|Deep update helper setIn|API rate limiter|Notification event emitter|Memoized price calculator|Compose pipeline for data cleaning").split("|");
+const DS=[
+`const products = [\n  { id: 1, name: "Phone", price: 500, stock: 5, cat: "tech", tags: ["new"] },\n  { id: 2, name: "Shirt", price: 20, stock: 0, cat: "fashion", tags: [] },\n  { id: 3, name: "Laptop", price: 900, stock: 2, cat: "tech", tags: ["sale", "new"] }\n];\nconst cart = [];`,
+`const stocks = [\n  { sym: "TCS", price: 3500, qty: 10, hist: [3400, 3450, 3500] },\n  { sym: "INFY", price: 1500, qty: 5, hist: [1550, 1520, 1500] },\n  { sym: "HDFC", price: 1600, qty: 0, hist: [1500, 1550, 1600] }\n];`,
+`const patients = [\n  { id: 1, name: "Ravi", age: 45, vitals: { bp: 140, hr: 80 }, meds: ["A", "B"] },\n  { id: 2, name: "Sana", age: 30, vitals: { bp: 110, hr: 70 }, meds: [] },\n  { id: 3, name: "Omar", age: 67, vitals: { bp: 150, hr: 95 }, meds: ["C"] }\n];`,
+`const profiles = [\n  { id: 1, name: "Aman", age: 25, city: "Pune", likes: ["music", "gym"] },\n  { id: 2, name: "Riya", age: 24, city: "Pune", likes: ["music", "art"] },\n  { id: 3, name: "Neha", age: 28, city: "Mumbai", likes: ["art"] }\n];`,
+`const movies = [\n  { id: 1, title: "Dune", genre: "scifi", rating: 8.1, views: 900, cast: ["A", "B"] },\n  { id: 2, title: "Up", genre: "family", rating: 8.3, views: 700, cast: ["C"] },\n  { id: 3, title: "Alien", genre: "scifi", rating: 7.9, views: 400, cast: ["B", "D"] }\n];\nconst watchlist = [];`];
+const RWS={
+1:[`const names = [];\nfor (let i = 0; i < products.length; i++) names.push(products[i].name);\nconsole.log(names);`,`console.log(products.map(p => p.name));`,"Used for: product listings and dropdowns. map builds a NEW array by transforming every item; the original is not changed."],
+3:[`const id = 2;\nlet found = null;\nfor (let i = 0; i < patients.length; i++) {\n  if (patients[i].id === id) { found = patients[i]; break; }\n}\nconsole.log(found ? found.name : "Not found");`,`const byId = new Map(patients.map(p => [p.id, p]));\nconsole.log(byId.get(2)?.name ?? "Not found");`,"Used for: patient search. A loop or find is O(n); for repeated lookups build a Map (O(1)). Always handle the not-found case."],
+11:[`const out = [];\nfor (let i = 0; i < products.length; i++) {\n  if (products[i].stock > 0) out.push(products[i]);\n}\nconsole.log(out);`,`console.log(products.filter(p => p.stock > 0));`,"Used for: hiding out-of-stock items in a shop. filter keeps only the items for which the callback returns true."],
+12:[`const out = [];\nfor (const s of stocks) if (s.price > 1500) out.push(s.sym);\nconsole.log(out);`,`console.log(stocks.filter(s => s.price > 1500).map(s => s.sym));`,"Used for: a stock screener. filter then map: first narrow the list, then pick only the field you need."],
+17:[`let total = 0;\nfor (const s of stocks) total += s.price * s.qty;\nconsole.log(total);`,`const total = stocks.reduce((t, s) => t + s.price * s.qty, 0);\nconsole.log(total.toLocaleString("en-IN", { style: "currency", currency: "INR" }));`,"Used for: portfolio or cart totals. Always give reduce an initial value (0), otherwise an empty array throws an error."],
+21:[`const id = 1, qty = 2;\nfor (let i = 0; i < products.length; i++) {\n  if (products[i].id === id) {\n    if (products[i].stock < qty) console.log("Not enough stock");\n    else products[i].stock -= qty; // MUTATES original\n  }\n}\nconsole.log(products[0]);`,`const buy = (list, id, qty) => list.map(p => {\n  if (p.id !== id) return p;\n  if (p.stock < qty) throw new Error("Not enough stock");\n  return { ...p, stock: p.stock - qty }; // new object\n});\nconsole.log(buy(products, 1, 2)[0], products[0].stock);`,"Used for: checkout. In React or Redux you do not mutate state, you create a new object. In a real app the server reduces stock atomically to avoid race conditions."],
+22:[`const next = [];\nfor (let i = 0; i < stocks.length; i++) {\n  const s = stocks[i];\n  next.push(s.sym === "TCS" ? { sym: s.sym, price: 3600, qty: s.qty, hist: s.hist.concat(3600) } : s);\n}\nconsole.log(next[0]);`,`const next = stocks.map(s => s.sym === "TCS" ? { ...s, price: 3600, hist: [...s.hist, 3600] } : s);\nconsole.log(next[0], stocks[0].price);`,"Used for: live price ticks. Spread {...s} copies the object and only the changed keys are overridden. The original stocks array stays safe."],
+23:[`const id = 2, left = [];\nfor (let i = 0; i < patients.length; i++) {\n  if (patients[i].id !== id) left.push(patients[i]);\n}\nconsole.log(left.map(p => p.name));`,`const left = patients.filter(p => p.id !== 2);\nconsole.log(left.map(p => p.name));`,"Used for: a delete button. Deleting means keep everything except this id. splice mutates the array, filter does not."],
+51:[`const g = {};\nfor (const p of products) {\n  if (!g[p.cat]) g[p.cat] = [];\n  g[p.cat].push(p.name);\n}\nconsole.log(g);`,`const g = products.reduce((a, p) => ((a[p.cat] ??= []).push(p.name), a), {});\nconsole.log(g);`,"Used for: category tabs and filters. Pattern: if the key is missing create an empty array, then push. This is the core of groupBy."],
+57:[`const chg = s => (s.price - s.hist[0]) / s.hist[0] * 100;\nlet best = stocks[0], worst = stocks[0];\nfor (const s of stocks) {\n  if (chg(s) > chg(best)) best = s;\n  if (chg(s) < chg(worst)) worst = s;\n}\nconsole.log(best.sym, chg(best).toFixed(1) + "%", worst.sym, chg(worst).toFixed(1) + "%");`,`const chg = s => (s.price - s.hist[0]) / s.hist[0] * 100;\nconst r = [...stocks].sort((a, b) => chg(b) - chg(a));\nconsole.log(r[0].sym, r.at(-1).sym);`,"Used for: top gainers and losers. Sort a copy [...stocks], otherwise the original order is changed."]};
+const rwStart=n=>"// Q"+n+" ["+DOM[(n-1)%5]+"] "+RWT[n-1]+"\n// Sample data (you can add your own):\n"+DS[(n-1)%5]+"\n\n// Write your solution here and use console.log to see the output\n\n";
+const saveMy=(k,t,c)=>{my[k]={t,c,n:(my[k]&&my[k].n)||"",ts:Date.now()};LS.set("ll:my",JSON.stringify(my))};
+/* nav + page shell */
+$("#pgn").insertAdjacentHTML("beforeend",'<button data-p="4">Real-World (100)</button><button data-p="5">2D Loops</button><button data-p="6">My Logic</button><button data-p="7">Interview</button>');
+$("#pg2").insertAdjacentHTML("afterend",'<div id="pgx" hidden></div>');
+const X=$("#pgx"),_sp=showPg;
+showPg=function(p){clearInterval(mxt);clearInterval(it);
+  if(p<4){X.hidden=true;_sp(p);return}
+  pg=p;$("#pg1").hidden=true;$("#pg2").hidden=true;X.hidden=false;
+  document.querySelectorAll("#pgn button").forEach(b=>b.classList.toggle("on",+b.dataset.p===p));
+  ({4:rwR,5:mxR,6:myR,7:ivR})[p]();
+};
+/* timer: running indicator */
+const _ts=tset;tset=function(on){_ts(on);document.querySelector(".tm").classList.toggle("go",go)};
+$(".btns").insertAdjacentHTML("beforeend",'<button class="b" id="sv">Save my logic</button>');
+$("#sv").onclick=()=>{const x=cur?list[cur-1]:null;saveMy("P"+cur,x?"Q"+x.l+". "+x.t:"Free play",ed.value);$("#sv").textContent="Saved ✓";setTimeout(()=>$("#sv").textContent="Save my logic",1200)};
+/* ---- Real-World ---- */
+function rwR(){
+  let h='<div class="xg"><div class="xs">';
+  LV.forEach((l,L)=>{let c=0,b="";for(let i=L*10;i<L*10+10;i++){const n=i+1;if(rwD[n])c++;b+=`<button data-a="rq" data-n="${n}" class="${n===rn?"on ":""}${rwD[n]?"ok":""}">${n}. ${esc(RWT[i])}${rwD[n]?" ✓":""}</button>`}
+    h+=`<details${rn>L*10&&rn<=L*10+10?" open":""}><summary>Level ${L+1}: ${esc(l)} <small>${c}/10</small></summary>${b}</details>`});
+  X.innerHTML=h+'</div><div id="rwm"></div></div>';rwQ();
+}
+function rwQ(){
+  const i=rn-1,L=Math.floor(i/10),s=RWS[rn],code=LS.get("ll:r"+rn)||rwStart(rn);
+  let h=`<div class="qi"><div><span class="dm">${DOM[i%5]}</span> <b>Level ${L+1}: ${esc(LV[L])}</b></div><div><b>Q${rn}.</b> ${esc(RWT[i])}</div></div>`;
+  h+=`<div class="btns" style="margin:8px 0;flex-wrap:wrap"><button class="b p" data-a="rr">Run</button><button class="b" data-a="rtb">Loop table</button><button class="b" data-a="rv">${rsh?"Hide":"Reveal"} solution</button><button class="b" data-a="rsv">Save my logic</button><button class="b" data-a="rd">${rwD[rn]?"Solved ✓ "+fmt(rwD[rn])+" (undo)":"Mark solved"}</button></div><textarea id="rwe" spellcheck="false">${esc(code)}</textarea><pre class="out" id="rwo" style="margin-top:8px"></pre>`;
+  if(rsh)h+=s?`<div id="rsl"><div class="tabs"><button data-a="rs" data-t="0" class="${rt?"":"on"}">Custom (loops)</button><button data-a="rs" data-t="1" class="${rt?"on":""}">Advanced (methods)</button></div><pre class="cb">${esc(s[rt])}</pre><p>${esc(s[2])}</p><button class="b p" data-a="rl">Load in editor</button></div>`:`<div id="rsl">${empty("No solution has been added for this question yet. Try it yourself first.")}</div>`;
+  $("#rwm").innerHTML=h;
+}
+/* ---- 2D Loops ---- */
+let mx={R:3,C:4,K:2,mode:"nested",ord:"col"};
+function mxSeq(){const{R,C,K,mode,ord}=mx,r=ord==="row",s=[];
+  if(mode==="flat")for(let x=0;x<R*C;x++)s.push({k:0,i:r?Math.floor(x/C):x%R,j:r?x%C:Math.floor(x/R)});
+  else if(mode==="stair"){if(r){for(let i=0;i<R;i++)for(let j=0;j<=i&&j<C;j++)s.push({k:0,i,j})}else for(let j=0;j<C;j++)for(let i=j;i<R;i++)s.push({k:0,i,j})}
+  else for(let k=0;k<(mode==="triple"?K:1);k++){if(r){for(let i=0;i<R;i++)for(let j=0;j<C;j++)s.push({k,i,j})}else for(let j=0;j<C;j++)for(let i=0;i<R;i++)s.push({k,i,j})}
+  return s}
+function mxCode(){const{R,C,K,mode,ord}=mx,r=ord==="row",t=mode==="triple";
+  const ad=(t?"k * R * C + ":"")+(r?"i * C + j":"j * R + i"),body='console.log("A[" + i + "][" + j + "] -> address", '+ad+');';
+  const lp=(v,n,b)=>"for (let "+v+" = 0; "+v+" < "+n+"; "+v+"++) {\n"+b.replace(/^/gm,"  ")+"\n}";
+  let c="const R = "+R+", C = "+C+(t?", K = "+K:"")+";\n// "+(r?"Row-major: address = i * C + j":"Column-major: address = j * R + i")+"\n";
+  if(mode==="flat")c+=lp("x","R * C",(r?"const i = Math.floor(x / C), j = x % C;":"const i = x % R, j = Math.floor(x / R);")+"\n"+body);
+  else if(mode==="stair")c+=r?lp("i","R","for (let j = 0; j <= i; j++) {\n  "+body+"\n}"):lp("j","C","for (let i = j; i < R; i++) {\n  "+body+"\n}");
+  else{const n2=r?lp("i","R",lp("j","C",body)):lp("j","C",lp("i","R",body));c+=t?lp("k","K",n2):n2}
+  return c}
+function mxR(){
+  const o=(id,v,a)=>`<select id="${id}">`+a.map(([k,t])=>`<option value="${k}"${k===v?" selected":""}>${t}</option>`).join("")+"</select>";
+  X.innerHTML=`<div class="rf" style="padding:0;max-width:1100px"><p class="emp">Column-major: address = j × rows + i. Row-major: address = i × cols + j. Press Play to watch the matrix and memory fill step by step (changing the outer loop changes the order).</p><div class="ct"><label>Rows <input id="mR" type="number" min="1" max="6" value="${mx.R}"></label><label>Cols <input id="mC" type="number" min="1" max="6" value="${mx.C}"></label><label>Layers <input id="mK" type="number" min="1" max="3" value="${mx.K}"></label>${o("mM",mx.mode,[["flat","1 loop (flat index)"],["nested","2 nested loops (i, j)"],["triple","3 nested loops (k, i, j)"],["stair","Start pattern (triangle)"]])}${o("mO",mx.ord,[["row","Row-major"],["col","Column-major"]])}<button class="b p" data-a="mp">▶ Play</button><button class="b" data-a="mc">Open in loop table</button></div><div id="mxs" class="emp"></div><div id="mxg"></div><h4>Memory (linear)</h4><div class="mxm" id="mxm"></div><h4>Code</h4><pre class="cb" id="mxcode"></pre></div>`;
+  mxDraw(-1)}
+function mxDraw(n){const{R,C,K,mode,ord}=mx,r=ord==="row",seq=mxSeq(),L=mode==="triple"?K:1,ad=e=>e.k*R*C+(r?e.i*C+e.j:e.j*R+e.i),val={};
+  seq.forEach((e,s)=>{if(s<=n)val[e.k+","+e.i+","+e.j]=s+1});
+  let g="";for(let k=0;k<L;k++){g+=`<div class="mxg" style="grid-template-columns:repeat(${C},46px)">`;for(let i=0;i<R;i++)for(let j=0;j<C;j++){const v=val[k+","+i+","+j],c=n>=0&&seq[n].k===k&&seq[n].i===i&&seq[n].j===j;g+=`<div class="mxc${v?" v":""}${c?" cur":""}" title="A[${i}][${j}]">${v||""}</div>`}g+="</div>"}
+  const mem=Array(R*C*L).fill(null);seq.forEach((e,s)=>{if(s<=n)mem[ad(e)]=e});
+  $("#mxg").innerHTML=g;
+  $("#mxm").innerHTML=mem.map((e,a)=>`<div class="${e?"f":""}"><b>addr ${a}</b>${e?"A["+e.i+"]["+e.j+"]"+(L>1?"["+e.k+"]":""):""}</div>`).join("");
+  $("#mxs").textContent=n<0?"Press Play.":"Step "+(n+1)+"/"+seq.length+" · k="+seq[n].k+" i="+seq[n].i+" j="+seq[n].j+" · address = "+ad(seq[n]);
+  $("#mxcode").textContent=mxCode()}
+/* ---- My Logic ---- */
+function myR(){const ks=Object.keys(my).sort((a,b)=>my[b].ts-my[a].ts);
+  X.innerHTML=`<div class="rf" style="padding:0;max-width:1000px"><p class="emp">Press "Save my logic" on the Practice or Real-World page. Your own solution and notes are stored here (in this browser).</p>`+(ks.length?ks.map(k=>`<article class="cd"><h4>${esc(my[k].t)}</h4><pre class="cb">${esc(my[k].c)}</pre><textarea class="nt" data-k="${k}" placeholder="Your logic / notes: why this approach, complexity..." style="width:100%;min-height:54px;padding:8px;border:1px solid var(--ln);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit">${esc(my[k].n)}</textarea><div class="btns" style="margin-top:6px"><button class="b" data-a="ml" data-k="${k}">Open in editor</button><button class="b" data-a="md" data-k="${k}">Delete</button></div></article>`).join(""):empty("No saved logic yet."))+"</div>"}
+/* ---- Interview ---- */
+const pool=()=>{const p=[];Object.keys(done).forEach(n=>{const x=list[n-1];if(x)p.push({k:"P"+n,t:x.t,io:QX[x.t],base:+done[n]})});Object.keys(rwD).forEach(n=>p.push({k:"R"+n,t:RWT[n-1],base:+rwD[n]}));return p};
+function ivStat(){if(!iv.length)return empty("No interview attempts yet.");
+  const s=iv.map(x=>x.s),avg=Math.round(s.reduce((a,b)=>a+b,0)/s.length),lv=avg<=180?"Expert":avg<=360?"Advanced":avg<=600?"Intermediate":avg<=900?"Beginner+":"Beginner",pr=iv.filter(x=>x.base),ratio=pr.length?Math.round(pr.reduce((a,x)=>a+x.s/x.base,0)/pr.length*100):0;
+  return `<div class="lv">${lv}</div><div>Attempts <b>${iv.length}</b> · Average <b>${fmt(avg)}</b> · Fastest <b>${fmt(Math.min(...s))}</b> · Slowest <b>${fmt(Math.max(...s))}</b>${pr.length?" · Time vs practice <b>"+ratio+"%</b>":""}</div><small>Level: ≤3m Expert, ≤6m Advanced, ≤10m Intermediate, ≤15m Beginner+, above that Beginner.</small><table><tr><th>#</th><th>Question</th><th>Time</th><th>Practice</th></tr>${iv.slice(-8).reverse().map((x,i)=>`<tr><td>${iv.length-i}</td><td>${esc(x.t)}</td><td>${fmt(x.s)}</td><td>${x.base?fmt(x.base):"-"}</td></tr>`).join("")}</table>`}
+function ivTick(){const e=$("#ivt");if(!e)return;const s=Math.round((Date.now()-i0)/1000);e.textContent=fmt(s);e.style.color=s>600?"var(--er)":""}
+function ivR(){const n=pool().length;X.innerHTML=`<div class="rf" style="padding:0;max-width:1000px"><div class="cd">${ivStat()}${iv.length?'<div class="btns" style="margin-top:8px"><button class="b" data-a="ic">Clear history</button></div>':""}</div><p class="emp">Only questions you marked as Solved are asked (currently ${n}).</p><div id="ivq"></div></div>`;ivQ();if(iq){clearInterval(it);it=setInterval(ivTick,500)}}
+function ivQ(){const e=$("#ivq");if(!e)return;
+  if(!iq){e.innerHTML=pool().length?'<button class="b p" data-a="is">▶ Interview start (random question)</button>':"";return}
+  e.innerHTML=`<div class="qi"><div><b>${esc(iq.t)}</b></div>${iq.io?`<div>Example input: <code>${esc(iq.io[0])}</code></div><div>Expected: <code>${esc(iq.io[1])}</code></div>`:""}<div>Time: <span id="ivt" class="lv">00:00</span> <small>(10 min target)</small></div></div><textarea id="ive" spellcheck="false">// ${esc(iq.t)}\n\n</textarea><div class="btns" style="margin:8px 0"><button class="b p" data-a="ir">Run</button>${my[iq.k]?'<button class="b" data-a="iy">Show my saved logic</button>':""}<button class="b" data-a="iu">Submit (solved)</button><button class="b" data-a="ie">Clear editor</button><button class="b" data-a="is">Skip</button></div><pre class="out" id="ivo"></pre>`;ivTick()}
+function ivStart(){const p=pool().filter(x=>!iq||x.k!==iq.k),q=p.length?p:pool();if(!q.length)return;iq=q[Math.floor(Math.random()*q.length)];i0=Date.now();clearInterval(it);it=setInterval(ivTick,500);ivQ()}
+const show=async(src,id)=>{const r=await exec(src);$(id).innerHTML=esc(r.out.join("\n")||"(nothing printed)")+(r.err?`<div class="err">${esc(r.err)}</div>`:"")};
+/* ---- events ---- */
+X.addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!b.dataset.a)return;const a=b.dataset.a,d=b.dataset;
+  if(a==="rq"){rn=+d.n;rs=Date.now();rsh=false;rwR()}
+  else if(a==="rr")show($("#rwe").value,"#rwo");
+  else if(a==="rtb")tryCode($("#rwe").value);
+  else if(a==="rv"){rsh=!rsh;rwQ()}
+  else if(a==="rs"){rt=+d.t;rwQ()}
+  else if(a==="rl"){$("#rwe").value=rwStart(rn)+RWS[rn][rt];LS.set("ll:r"+rn,$("#rwe").value)}
+  else if(a==="rsv"){saveMy("R"+rn,"RW Q"+rn+". "+RWT[rn-1],$("#rwe").value);b.textContent="Saved ✓"}
+  else if(a==="rd"){if(rwD[rn])delete rwD[rn];else rwD[rn]=Math.max(1,Math.round((Date.now()-rs)/1000));LS.set("ll:rwd",JSON.stringify(rwD));rwR()}
+  else if(a==="mp"){clearInterval(mxt);const n=mxSeq().length;let s=0;mxt=setInterval(()=>{mxDraw(s);if(++s>=n)clearInterval(mxt)},400)}
+  else if(a==="mc")tryCode(mxCode());
+  else if(a==="ml")tryCode(my[d.k].c);
+  else if(a==="md"){delete my[d.k];LS.set("ll:my",JSON.stringify(my));myR()}
+  else if(a==="is")ivStart();
+  else if(a==="ir")show($("#ive").value,"#ivo");
+  else if(a==="iy")$("#ivo").textContent=my[iq.k].c;
+  else if(a==="iu"){iv.push({k:iq.k,t:iq.t,s:Math.max(1,Math.round((Date.now()-i0)/1000)),base:iq.base});LS.set("ll:iv",JSON.stringify(iv.slice(-200)));iq=null;clearInterval(it);ivR()}
+});
+X.addEventListener("input",e=>{if(e.target.id==="rwe")LS.set("ll:r"+rn,e.target.value)});
+X.addEventListener("change",e=>{const t=e.target;
+  if(t.classList.contains("nt")){my[t.dataset.k].n=t.value;LS.set("ll:my",JSON.stringify(my));return}
+  const m={mR:["R",1,6],mC:["C",1,6],mK:["K",1,3]};
+  if(m[t.id]){mx[m[t.id][0]]=Math.min(m[t.id][2],Math.max(1,+t.value||1));clearInterval(mxt);mxR()}
+  else if(t.id==="mM"||t.id==="mO"){mx[t.id==="mM"?"mode":"ord"]=t.value;clearInterval(mxt);mxR()}});
+/* ---- Date, Data Types, more String (reference tab) ---- */
+BAS.Date=[
+["new Date() / Date.now()","Gives the current date-time or a timestamp (ms). Months are 0-based (Jan = 0). Used for: createdAt, token expiry, order time.",L(`const t = Date.now();`,`console.log(typeof t, t > 0);`),L(`const d = new Date("2026-10-20");`,`console.log(d.getFullYear(), d.getMonth() + 1, d.getDate());`)],
+["Days between two dates","Date minus Date gives milliseconds. Used for: subscription expiry, appointment gaps, 'days left'.",L(`const a = new Date("2026-01-01"), b = new Date("2026-01-31");`,`let days = 0;`,`for (let d = new Date(a); d < b; d.setDate(d.getDate() + 1)) days++;`,`console.log(days);`),L(`const a = new Date("2026-01-01"), b = new Date("2026-01-31");`,`console.log((b - a) / 86400000);`)],
+["Add days / format","setDate mutates the date. toISOString returns UTC, toLocaleDateString uses the user's format. Used for: due dates, delivery dates, UI display.",L(`const d = new Date("2026-10-20");`,`d.setDate(d.getDate() + 10);`,`console.log(d.toISOString().slice(0, 10));`),L(`const d = new Date("2026-10-30");`,`console.log(d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }));`)],
+["Compare and sort dates","Convert dates to numbers to compare them. Used for: latest-first feeds, upcoming appointments.",L(`const a = ["2026-03-01", "2026-01-15", "2026-02-10"];`,`for (let i = 0; i < a.length; i++)`,`  for (let j = 0; j < a.length - i - 1; j++)`,`    if (new Date(a[j]) > new Date(a[j + 1])) { const t = a[j]; a[j] = a[j + 1]; a[j + 1] = t; }`,`console.log(a);`),L(`const a = ["2026-03-01", "2026-01-15", "2026-02-10"];`,`console.log(a.sort((x, y) => new Date(x) - new Date(y)));`)]];
+BAS["Data Types"]=[
+["typeof and primitives","7 primitives: string, number, boolean, null, undefined, symbol, bigint. Everything else is an object. typeof null === 'object' is an old bug. Used for: input validation.",L(`const v = [1, "a", true, null, undefined, {}, []];`,`for (let i = 0; i < v.length; i++) console.log(typeof v[i]);`),L(`console.log(Array.isArray([]), typeof null);`)],
+["null vs undefined","undefined = no value was set. null = intentionally empty. ?? gives a default only for null/undefined, while || also replaces 0 and ''. Used for: missing API fields.",L(`let a; const b = null;`,`console.log(a === undefined, b === null);`),L(`const c = 0;`,`console.log(c || 10, c ?? 10); // 10 vs 0`)],
+["== vs ===, truthy / falsy","=== also checks the type (use it by default). Falsy: false, 0, '', null, undefined, NaN. Everything else is truthy (even an empty array). Used for: if conditions.",L(`console.log(0 == "", 0 === "", [] ? "truthy" : "falsy");`),L(`console.log([0, "", null, NaN, "0", []].map(Boolean));`)],
+["Copy: value vs reference","Primitives are copied by value, objects and arrays by reference. Use structuredClone for a deep copy. Used for: state update bugs.",L(`const a = { n: 1, inner: { x: 1 } };`,`const b = { n: a.n, inner: { x: a.inner.x } };`,`b.inner.x = 9;`,`console.log(a.inner.x);`),L(`const a = { inner: { x: 1 } };`,`const shallow = { ...a }, deep = structuredClone(a);`,`shallow.inner.x = 9;`,`console.log(a.inner.x, deep.inner.x);`)]];
+BAS.String.push(
+["padStart() / trim()","padStart fills the start of a string, trim removes surrounding spaces. Used for: invoice numbers like 0007, form input cleanup.",L(`let s = "7";`,`while (s.length < 4) s = "0" + s;`,`console.log(s);`),L(`console.log("7".padStart(4, "0"), "  hi  ".trim());`)],
+["replaceAll() / startsWith()","replaceAll changes every match. startsWith / endsWith check a prefix or suffix. Used for: building slugs, URL or phone checks.",L(`const s = "a-b-c";`,`let out = "";`,`for (let i = 0; i < s.length; i++) out += s[i] === "-" ? " " : s[i];`,`console.log(out);`),L(`console.log("a-b-c".replaceAll("-", " "), "+91 99".startsWith("+91"));`)],
+["localeCompare()","localeCompare sorts alphabetically in a locale-aware way (accents too). Used for: sorting names, search lists.",L(`const a = ["b", "a", "c"];`,`a.sort();`,`console.log(a);`),L(`console.log(["Zoe", "amy", "Bob"].sort((x, y) => x.localeCompare(y)));`)]);
+Object.assign(RWS,{
+2:[`// count holdings and total shares\nlet holdings = 0, shares = 0;\nfor (let i = 0; i < stocks.length; i++) {\n  holdings = holdings + 1;\n  shares = shares + stocks[i].qty;\n}\nconsole.log(holdings, shares);`,`console.log(stocks.length, stocks.reduce((t, s) => t + s.qty, 0));`,"Used for: a portfolio summary card. length counts the items; reduce adds up one field."],
+4:[`// collect every name into a new array\nconst names = [];\nfor (let i = 0; i < profiles.length; i++) {\n  names.push(profiles[i].name);\n}\nconsole.log(names);`,`console.log(profiles.map(p => p.name));`,"Used for: a people list or a search suggestion box."],
+5:[`// count movies whose genre is "scifi"\nlet count = 0;\nfor (let i = 0; i < movies.length; i++) {\n  if (movies[i].genre === "scifi") count++;\n}\nconsole.log(count);`,`console.log(movies.filter(m => m.genre === "scifi").length);`,"Used for: genre badges like 'Sci-Fi (2)'. Loop and count, or filter then take length."],
+6:[`// add the first product to the cart, but only once\nconst item = products[0];\nlet exists = false;\nfor (let i = 0; i < cart.length; i++) {\n  if (cart[i].id === item.id) exists = true;\n}\nif (!exists) cart.push({ id: item.id, name: item.name, qty: 1 });\nconsole.log(cart);`,`const add = (c, p) => c.some(x => x.id === p.id)\n  ? c.map(x => x.id === p.id ? { ...x, qty: x.qty + 1 } : x)\n  : [...c, { id: p.id, name: p.name, qty: 1 }];\nconsole.log(add(add(cart, products[0]), products[0]));`,"Used for: Add to cart. Check if the item exists: increase qty if yes, otherwise add it with qty 1."],
+7:[`// the latest price is the last item of hist\nconst s = stocks[0];\nconst latest = s.hist[s.hist.length - 1];\nconsole.log(s.sym, latest);`,`console.log(stocks[0].hist.at(-1));`,"Used for: showing the live price. The last index is length - 1; at(-1) is a shortcut."],
+8:[`// does any patient take a medicine?\nlet any = false;\nfor (let i = 0; i < patients.length; i++) {\n  if (patients[i].meds.length > 0) any = true;\n}\nconsole.log(any);`,`console.log(patients.some(p => p.meds.length > 0));`,"Used for: a 'needs follow-up' flag. some returns true as soon as one item matches."],
+9:[`// keep the profile with the highest age\nlet oldest = profiles[0];\nfor (let i = 1; i < profiles.length; i++) {\n  if (profiles[i].age > oldest.age) oldest = profiles[i];\n}\nconsole.log(oldest.name, oldest.age);`,`console.log(profiles.reduce((a, p) => (p.age > a.age ? p : a)).name);`,"Used for: finding a max or min by one field. Start with the first item, then compare the rest."],
+10:[`// keep the movie with the highest rating\nlet best = movies[0];\nfor (let i = 1; i < movies.length; i++) {\n  if (movies[i].rating > best.rating) best = movies[i];\n}\nconsole.log(best.title);`,`console.log([...movies].sort((a, b) => b.rating - a.rating)[0].title);`,"Used for: a 'Top pick' banner. Same max pattern as the oldest profile."],
+13:[`// keep patients whose bp is above 130\nconst out = [];\nfor (let i = 0; i < patients.length; i++) {\n  if (patients[i].vitals.bp > 130) out.push(patients[i].name);\n}\nconsole.log(out);`,`console.log(patients.filter(p => p.vitals.bp > 130).map(p => p.name));`,"Used for: a risk dashboard. Note the nested read: p.vitals.bp."],
+14:[`// keep profiles whose city is "Pune"\nconst out = [];\nfor (let i = 0; i < profiles.length; i++) {\n  if (profiles[i].city === "Pune") out.push(profiles[i].name);\n}\nconsole.log(out);`,`console.log(profiles.filter(p => p.city === "Pune").map(p => p.name));`,"Used for: 'People near you' in a dating app."],
+15:[`// keep movies with rating above 8\nconst out = [];\nfor (let i = 0; i < movies.length; i++) {\n  if (movies[i].rating > 8) out.push(movies[i].title);\n}\nconsole.log(out);`,`console.log(movies.filter(m => m.rating > 8).map(m => m.title));`,"Used for: a 'Top rated' row on a streaming home page."],
+16:[`// bubble sort a COPY by price (low to high)\nconst a = products.slice();\nfor (let i = 0; i < a.length; i++) {\n  for (let j = 0; j < a.length - i - 1; j++) {\n    if (a[j].price > a[j + 1].price) {\n      const t = a[j]; a[j] = a[j + 1]; a[j + 1] = t;\n    }\n  }\n}\nconsole.log(a.map(p => p.name));`,`console.log([...products].sort((a, b) => a.price - b.price).map(p => p.name));`,"Used for: 'Sort by price'. Always sort a copy, because sort changes the original array."],
+18:[`// average = sum of ages / number of patients\nlet sum = 0;\nfor (let i = 0; i < patients.length; i++) sum += patients[i].age;\nconsole.log(sum / patients.length);`,`console.log(patients.reduce((t, p) => t + p.age, 0) / patients.length);`,"Used for: report cards. Guard against an empty list (divide by zero)."],
+19:[`// keep profiles that like "music"\nconst out = [];\nfor (let i = 0; i < profiles.length; i++) {\n  if (profiles[i].likes.includes("music")) out.push(profiles[i].name);\n}\nconsole.log(out);`,`console.log(profiles.filter(p => p.likes.includes("music")).map(p => p.name));`,"Used for: interest filters. includes checks inside the nested likes array."],
+20:[`// add up the views\nlet total = 0;\nfor (let i = 0; i < movies.length; i++) total += movies[i].views;\nconsole.log(total);`,`console.log(movies.reduce((t, m) => t + m.views, 0));`,"Used for: analytics totals."]});
+</script>
+<script>
+/* ===== Batch 4: Matrix tab, interview clear, hardening ===== */
+document.head.insertAdjacentHTML("beforeend",`<style>.mt{width:auto;margin:6px 0 12px}.mt th,.mt td{text-align:center;padding:4px 10px}.mt td:first-child{width:auto}.mt caption{text-align:left;font-weight:700;padding:2px 0;color:var(--mu)}</style>`);
+let mord="row";
+function mat(){
+  const ev=last.ev,md=Math.max(-1,...ev.filter(e=>e.kind==="loop").map(e=>e.d)),inner=ev.filter(e=>e.kind==="loop"&&e.d===md),names=[];
+  const get=(e,k)=>{const x=e.vars.find(y=>y[0]===k);return x&&/^-?\d+$/.test(x[1])?+x[1]:null};
+  inner.forEach(e=>e.vars.forEach(([k])=>{if(!names.includes(k)&&get(e,k)!==null)names.push(k)}));
+  const vary=names.filter(k=>{const n=new Set(inner.map(e=>get(e,k)).filter(v=>v!==null)).size;return n>1&&n<=12&&n<inner.length});
+  if(vary.length<2){$("#rv").innerHTML=empty("Write two or three nested loops with index variables (for example i and j) and the matrix appears here.");return}
+  const [c,a,b]=vary.length>2?vary:[null,...vary.slice(0,2)],U=k=>k?[...new Set(inner.map(e=>get(e,k)))].filter(v=>v!==null).sort((x,y)=>x-y):[0];
+  const lay=U(c),rows=U(a),cols=U(b),R=rows.length,C=cols.length,cell={};
+  inner.forEach((e,s)=>{const key=(c?get(e,c):0)+","+get(e,a)+","+get(e,b);if(!(key in cell))cell[key]=s+1});
+  const ad=(l,r,q)=>l*R*C+(mord==="row"?r*C+q:q*R+r),mem=Array(lay.length*R*C).fill(null);
+  lay.forEach((l,li)=>rows.forEach((r,ri)=>cols.forEach((v,ci)=>{const s=cell[(c?l:0)+","+r+","+v];if(s)mem[ad(li,ri,ci)]={r,v,s}})));
+  let h=`<div class="ct"><label>Memory layout <select id="mo"><option value="row"${mord==="row"?" selected":""}>Row-major</option><option value="col"${mord==="col"?" selected":""}>Column-major</option></select></label></div><p class="emp">${mord==="row"?"address = "+esc(a)+" × cols + "+esc(b):"address = "+esc(b)+" × rows + "+esc(a)}${c?" (+ "+esc(c)+" × rows × cols)":""}. Each number is the loop step in which that cell was visited.</p>`;
+  lay.forEach(l=>{h+=`<table class="mt">${c?`<caption>${esc(c)} = ${l}</caption>`:""}<tr><th>${esc(a)} \\ ${esc(b)}</th>${cols.map(v=>`<th>${v}</th>`).join("")}</tr>${rows.map(r=>`<tr><th>${r}</th>${cols.map(v=>{const s=cell[(c?l:0)+","+r+","+v];return`<td>${s?`<span class="bx chg" style="--c:var(--d${(s-1)%4});animation:pop .4s backwards ${Math.min(s*60,2500)}ms">${s}</span>`:""}</td>`}).join("")}</tr>`).join("")}</table>`});
+  $("#rv").innerHTML=h+`<h4>Memory</h4><div class="mxm">${mem.map((e,i)=>`<div class="${e?"f":""}"><b>addr ${i}</b>${e?esc(a)+"="+e.r+", "+esc(b)+"="+e.v+" · #"+e.s:""}</div>`).join("")}</div>`}
+$("#rv").addEventListener("change",e=>{if(e.target.id==="mo"){mord=e.target.value;mat()}});
+X.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.a==="ic"){if(b.dataset.arm){iv=[];LS.set("ll:iv","[]");ivR()}else{b.dataset.arm="1";b.textContent="Click again to confirm";setTimeout(()=>{b.dataset.arm="";b.textContent="Clear history"},3000)}}
+  else if(b.dataset.a==="ie"&&iq){$("#ive").value="// "+iq.t+"\n\n";$("#ivo").textContent=""}});
+if(!window.acorn)document.querySelector(".top").insertAdjacentHTML("beforeend",'<p class="err">The code analyzer failed to load (check your internet connection). Run and the loop tables need it.</p>');
 </script>
 </body>
 </html>
