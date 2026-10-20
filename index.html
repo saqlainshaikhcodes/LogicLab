@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Logic Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{--bg:#F1F4F2;--pn:#fff;--ink:#16222B;--mu:#5A6A75;--ln:#D3DBDF;--ac:#0B6E99;--er:#B42318;--d0:#0B6E99;--d1:#7C3AED;--d2:#0F8A5F;--d3:#C2410C;--mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E181F;--pn:#16252E;--ink:#E4ECF1;--mu:#8FA3B0;--ln:#263A46;--ac:#4DB3E6;--er:#FF8A80;--d0:#4DB3E6;--d1:#A78BFA;--d2:#4ADE9E;--d3:#FB923C;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E181F;--pn:#16252E;--ink:#E4ECF1;--mu:#8FA3B0;--ln:#263A46;--ac:#4DB3E6;--er:#FF8A80;--d0:#4DB3E6;--d1:#A78BFA;--d2:#4ADE9E;--d3:#FB923C;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Bricolage Grotesque",system-ui,sans-serif}
+.top{padding:18px 22px 6px}.top h1{margin:0;font-size:26px;letter-spacing:-.02em}.top p{margin:2px 0 0;color:var(--mu)}
+.wrap{display:grid;grid-template-columns:290px minmax(0,1fr);gap:16px;padding:12px 22px 28px}
+aside{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;max-height:92vh;overflow:auto;background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:10px}
+aside input{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit;margin-bottom:6px}
+aside h3{margin:12px 4px 4px;font-size:13px;color:var(--mu);font-weight:700}
+aside button{display:block;width:100%;text-align:left;background:none;border:0;border-left:3px solid transparent;color:var(--ink);font:inherit;font-size:13.5px;padding:4px 6px;cursor:pointer;border-radius:0 5px 5px 0}
+aside button:hover{background:var(--bg)}aside button.on{border-left-color:var(--ac);background:var(--bg);font-weight:700}
+aside button.ok{color:var(--d2)}
+main{min-width:0}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+#ttl{font-weight:700;font-size:17px}
+.btns{display:flex;gap:6px}
+button.b{font:inherit;font-size:14px;padding:6px 14px;border:1px solid var(--ln);background:var(--pn);color:var(--ink);border-radius:6px;cursor:pointer}
+button.b.p{background:var(--ac);border-color:var(--ac);color:var(--bg);font-weight:700}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+#ed{width:100%;height:280px;resize:vertical;padding:12px;border:1px solid var(--ln);border-radius:10px;background:var(--pn);color:var(--ink);font:14px/1.55 var(--mono);tab-size:2}
+.tabs{display:flex;gap:4px;margin:12px 0 8px;border-bottom:1px solid var(--ln)}
+.tabs button{font:inherit;background:none;border:0;border-bottom:3px solid transparent;padding:6px 12px;color:var(--mu);cursor:pointer;margin-bottom:-1px}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--ac);font-weight:700}
+#st{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;font-size:13px;color:var(--mu);align-items:center}
+.c{display:inline-block;background:var(--bg);border:1px solid var(--ln);border-radius:5px;padding:0 6px;font:12.5px/1.6 var(--mono);color:var(--ink);margin:1px 2px 1px 0}
+.c b{color:var(--ac)}
+#res{background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:12px;overflow-x:auto;min-height:120px}
+pre.out{margin:0;font:14px/1.55 var(--mono);white-space:pre-wrap}
+.err{color:var(--er);font-family:var(--mono);margin-top:8px;white-space:pre-wrap}
+.emp{color:var(--mu)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{text-align:left;color:var(--mu);font-weight:700;border-bottom:1px solid var(--ln);padding:4px 8px}
+td{border-bottom:1px solid var(--ln);padding:4px 8px;vertical-align:top}
+td:first-child{color:var(--mu);font-family:var(--mono);width:48px}
+.tag{font:600 12px var(--mono);color:var(--c,var(--ac))}
+small{color:var(--mu)}
+.root{font-weight:700;margin-bottom:4px}
+ul.mm,ul.mm ul{list-style:none;margin:0;padding-left:16px}
+ul.mm ul{border-left:2px solid var(--c,var(--ln));margin-left:4px}
+ul.mm li{margin:3px 0}
+ul.mm summary{cursor:pointer}
+ul.mm em{color:var(--mu);font-size:12px;font-style:normal;margin-left:4px}
+@media(max-width:820px){.wrap{grid-template-columns:1fr;padding:10px 12px 24px}aside{position:static;max-height:230px}.top{padding:14px 12px 4px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.wrap{grid-template-columns:240px minmax(0,1.05fr) minmax(0,1fr)}
+.tm{display:flex;align-items:center;gap:6px}
+#tm{font:700 18px var(--mono);min-width:66px;text-align:center}#tm.late{color:var(--er)}
+select.b{padding:6px 8px}
+.qi{background:var(--pn);border:1px solid var(--ln);border-left:4px solid var(--ac);border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:13.5px}
+.qi div{margin:3px 0}.qi b{color:var(--ac)}.qi code{font:12.5px var(--mono);background:var(--bg);padding:0 5px;border-radius:4px;white-space:pre-wrap}
+.rp{position:sticky;top:12px;align-self:start;max-height:94vh;display:flex;flex-direction:column;background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:10px;min-width:0}
+.rp .tabs{margin-top:0}
+#rv{overflow:auto;flex:1;min-height:220px}
+.pc{display:flex;gap:6px;align-items:center;margin-bottom:6px;font-size:13px;color:var(--mu)}
+#st{margin-bottom:6px}
+#tb th{position:sticky;top:0;background:var(--pn);z-index:1}
+#tb tr[data-i]{display:none}#tb tr.vis{display:table-row;animation:pop .35s}
+@keyframes pop{from{opacity:0;transform:translateY(-8px)}}
+.bx{display:inline-block;min-width:34px;text-align:center;border:1px solid var(--ln);border-radius:5px;padding:1px 7px;font:12.5px/1.6 var(--mono);background:var(--bg)}
+.bx.chg{border-color:var(--c);background:color-mix(in srgb,var(--c) 20%,transparent);font-weight:600}
+tr.cur td{background:color-mix(in srgb,var(--c) 12%,transparent)}
+#tb td.w{border-left:4px solid var(--c);width:auto;font-family:inherit}
+.nb{display:inline-block;border:1px solid var(--c);border-radius:6px;padding:1px 8px;background:color-mix(in srgb,var(--c) 8%,var(--pn))}
+ul.mm li{animation:pop .4s backwards}
+.g{margin:4px 0 12px;padding-left:20px}.g li{margin:2px 0}
+#res h4{margin:12px 0 2px;font-size:14px}#res h4:first-child{margin-top:0}
+@media(max-width:1250px){.wrap{grid-template-columns:230px minmax(0,1fr)}.rp{grid-column:1/-1;position:static;max-height:75vh}}
+@media(max-width:820px){.wrap{grid-template-columns:1fr}.rp{grid-column:auto}}
+[hidden]{display:none!important}
+#pgn{padding:0 22px;margin:6px 0 0}#pgn button{font-size:15px}
+.rf{max-width:980px;padding:8px 22px 32px}.cd{background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:12px 14px;margin:12px 0}.cd h4{margin:0 0 4px;font-size:16px}.cd p{margin:0 0 6px;color:var(--mu)}.lb{font-weight:700;font-size:13px;margin:8px 0 3px;color:var(--ac)}
+pre.cb{font:13px/1.55 var(--mono);background:var(--bg);border:1px solid var(--ln);padding:10px;border-radius:8px;overflow-x:auto;white-space:pre;margin:0 0 6px}
+#sol{background:var(--pn);border:1px solid var(--ln);border-left:4px solid var(--d1);border-radius:8px;padding:8px 12px;margin-bottom:8px}#sol .tabs{margin-top:0}
+@media(max-width:820px){#pgn{padding:0 12px}.rf{padding:8px 12px 24px}}
+</style>
+</head>
+<body>
+<header class="top"><h1>Logic Lab</h1><p>Write code, see the output, and watch every loop run step by step in a live table.</p></header>
+<nav class="tabs" id="pgn" aria-label="Sections"><button data-p="1" class="on">Practice (225)</button><button data-p="2">Concepts</button><button data-p="3">JS Basics</button></nav>
+<div class="wrap" id="pg1">
+<aside><input id="q" placeholder="Search question…" aria-label="Search question"><div id="lst"></div></aside>
+<main>
+<div class="bar"><div id="ttl">Free play</div>
+<div class="tm"><span id="tm">00:00</span><button class="b" id="tp">Pause</button><button class="b" id="tr">Reset</button>
+<select class="b" id="tc" aria-label="Timer mode"><option value="0">Stopwatch</option><option value="300">5 min limit</option><option value="600">10 min limit</option><option value="900">15 min limit</option><option value="1800">30 min limit</option></select></div></div>
+<div class="bar"><div class="btns"><button class="b p" id="run">Run</button><button class="b" id="dn">Mark solved</button><button class="b" id="th">Theme</button><button class="b" id="rvl">Reveal solution</button></div></div>
+<div class="qi" id="qi"></div><div id="sol" hidden></div>
+<textarea id="ed" spellcheck="false" autocapitalize="off" aria-label="Code editor"></textarea>
+<nav class="tabs" id="mt"><button data-t="out" class="on">Output</button><button data-t="guide">Interview Guide</button></nav>
+<section id="res"></section>
+</main>
+<section class="rp"><nav class="tabs" id="rt"><button data-t="tbl" class="on">Loop Table</button><button data-t="map">Mind Map</button></nav>
+<div class="pc" id="pc"><button class="b" id="pl">▶ Replay</button><button class="b" id="sk">Show all</button><span id="sc"></span></div>
+<div id="st"></div><div id="rv"></div></section>
+</div>
+<div id="pg2" hidden></div>
+<script src="https://cdn.jsdelivr.net/npm/acorn@8.12.1/dist/acorn.js"></script>
+<script>
+const CATS=[["Numbers","Even or odd without %|Prime number check|Print primes up to N|Factorial (loop and recursion)|First N Fibonacci numbers|Is it a Fibonacci number|Reverse a number|Palindrome number|Sum of digits|Armstrong number|GCD of two numbers|LCM of two numbers|Perfect square check|Count digits|Decimal to binary (no toString)|Binary to decimal|Power of 2 check|Sum of first N natural numbers|Swap two numbers without temp|Largest of three without Math.max"],
+["Strings","Reverse string without reverse()|Palindrome string|Count vowels and consonants|First non-repeating character|Most frequent character|Anagram check|Remove duplicate characters|Capitalize each word|Longest word in sentence|Count words|Reverse each word|Reverse order of words|Only digits check|Compress string (aaabbc → a3b2c1)|Longest palindromic substring|Longest substring without repeats|String rotation check|camelCase / snake_case|Remove spaces without replace|All permutations of a string"],
+["Arrays","Largest and smallest|Second largest|Reverse array in place|Remove duplicates|Find duplicates|Merge two sorted arrays|Rotate array by K|Move zeros to end|Missing number 1 to N|Intersection of two arrays|Union of two arrays|Flatten nested array (no flat)|Sum using reduce|Two Sum|Kadane max subarray|Majority element|Chunk array into size N|Longest consecutive sequence|Is array sorted|Product except self|Equilibrium index|Rotate matrix 90°|Spiral order matrix|Matrix transpose|Pair with smallest difference"],
+["Objects, Maps, Sets","Frequency of each element|Group objects by key|Deep clone (no JSON)|Deep compare objects|Flatten nested object|First duplicate using Set|Sort objects by multiple keys|Invert object keys and values|Deep merge objects|LRU cache"],
+["Sorting and Searching","Binary search|Bubble sort|Selection sort|Insertion sort|Merge sort|Quick sort|First and last position in sorted array|Search in rotated sorted array|Kth largest element|Square root by binary search"],
+["Recursion and Patterns","Star pyramid|Diamond pattern|Pascal’s triangle|Tower of Hanoi|All subsets|Valid parentheses for N pairs|N-Queens (N=4)"],
+["JS-Specific","Array.prototype.map|Array.prototype.reduce|debounce and throttle|Promise.all|Function.prototype.bind|curry|memoize|Event emitter (on, off, emit)"],
+["Adv Arrays","Flatten deeply nested array to depth n (custom flat)|Array.prototype.filter with thisArg support|Intersection of N arrays|Symmetric difference of two arrays|Rotate array by K in O(1) extra space|Longest increasing subsequence|Longest subarray with sum K|Count subarrays with sum K (prefix sum + map)|Smallest subarray with sum ≥ target|Max of every sliding window of size K|Next greater element|Merge overlapping intervals|Insert interval into sorted intervals|Minimum meeting rooms required|First missing positive in O(n)|Three-sum triplets (sum zero)|Four-sum quadruplets|Container with most water|Trapping rain water|Sort 0s, 1s, 2s in one pass|Majority element (Boyer-Moore)|Elements appearing more than n/3 times|Shuffle array (Fisher-Yates)|Kth largest without full sort|Median of two sorted arrays"],
+["Adv Matrix and 2D","Rotate matrix 90° clockwise in place|Print matrix in spiral order|Generate N×N spiral matrix|Set row and column to zero|Search in row and column sorted matrix|Diagonal traversal of matrix|Count islands in grid|Largest rectangle of 1s|Valid Sudoku board|Game of Life (one generation)|Shortest path in maze (BFS)|Flood fill|Max path sum in grid|Word search in grid|Zigzag / wave print of matrix"],
+["Adv Hash Map and Frequency","Group anagrams|Top K frequent elements|Longest consecutive sequence in O(n)|First unique element|Arrays equal regardless of order|Subarrays with equal 0s and 1s|Pair with given difference|Distinct elements in every window of size K|Smallest window containing all chars of another string|Pairs with sum divisible by K|Isomorphic strings / arrays check|Item appearing odd number of times|Subarray with zero sum|Longest subarray with equal element frequency|Split into consecutive subsequences check"],
+["Adv Objects","Deep clone with circular references|Deep compare (arrays, dates, nested)|Flatten object to dot-notation keys|Unflatten dot-notation to nested object|Deep merge without mutation|Implement _.get with default|Implement _.set|Implement _.pick and _.omit|Implement _.groupBy|Implement _.keyBy and _.countBy|Implement _.mapValues and _.mapKeys|Diff between two objects|Apply a patch (diff) to an object|Array of objects to object keyed by id|Flat list with parentId to nested tree|Flatten tree with depth info|All paths to leaf nodes|Deepest key in nested object|Count total keys deeply|deepFreeze|Sort object keys recursively|Remove null/undefined deeply|Common keys across N objects|Invert object, duplicate values become arrays|Key-value pairs array to object and back"],
+["Adv Data Structures","LRU cache with Map|LFU cache|Stack with getMin() in O(1)|Queue using two stacks|Circular buffer|Min-heap / priority queue|Trie (insert, search, startsWith)|Graph adjacency list (BFS and DFS)|Cycle detection in directed graph|Topological sort for task dependencies|Hash map from scratch with collisions|Observable store (subscribe, dispatch)"],
+["Adv Real-World","Search with ranking on array of objects|Paginate array with metadata|Multi-field sort, asc/desc per key|Filter engine with AND/OR conditions|Normalize API data to byId and allIds|Shopping cart (discounts, merge, totals)|Merge arrays of objects by id with conflict rule|Undo/redo history manager"]];
+const list=[];CATS.forEach(([c,s])=>s.split("|").forEach(t=>list.push({n:list.length+1,c,t,l:list.length<100?""+(list.length+1):"A"+(list.length-99)})));
+const DEMO='// Nested loop demo: 3x3 multiplication table\nfor (let i = 1; i <= 3; i++) {\n  let row = "";\n  for (let j = 1; j <= 3; j++) {\n    row += i * j + " ";\n  }\n  console.log(row);\n}\n';
+const $=s=>document.querySelector(s),ed=$("#ed");
+const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+let cur=0,tab="out",last=null,timer,done={};
+try{done=JSON.parse(LS.get("ll:done")||"{}")}catch(e){}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function instrument(src){
+  const ast=acorn.parse(src,{ecmaVersion:"latest",locations:true,allowAwaitOutsideFunction:true,allowReturnOutsideFunction:true});
+  const walk=(n,f)=>{if(Array.isArray(n)){n.forEach(c=>walk(c,f));return}if(!n||typeof n.type!=="string")return;f(n);for(const k in n){const v=n[k];if(v&&typeof v==="object"&&k!=="loc")walk(v,f)}};
+  const names=new Set(),FN=/^(FunctionDeclaration|FunctionExpression|ArrowFunctionExpression)$/;
+  walk(ast,n=>{
+    if(n.type==="VariableDeclarator"&&n.id.type==="Identifier")names.add(n.id.name);
+    if(FN.test(n.type))n.params.forEach(p=>p.type==="Identifier"&&names.add(p.name));
+  });
+  const snap=ns=>"["+[...ns].map(k=>`["${k}",()=>${k}]`).join(",")+"]";
+  const ins=[],LB={ForStatement:"for",ForInStatement:"for-in",ForOfStatement:"for-of",WhileStatement:"while",DoWhileStatement:"do-while"};
+  walk(ast,n=>{
+    let b,kind,label,ns=names;
+    if(LB[n.type]){b=n.body;kind="loop";label=LB[n.type]}
+    else if(FN.test(n.type)&&n.body.type==="BlockStatement"){b=n.body;kind="fn";label=(n.id&&n.id.name)||"anonymous";ns=n.params.filter(p=>p.type==="Identifier").map(p=>p.name)}
+    if(!b)return;
+    const pre=`__t("${kind}","${label}",${n.loc.start.line},${snap(ns)});try{`,suf="}finally{__x()}";
+    if(b.type==="BlockStatement")ins.push([b.start+1,pre],[b.end-1,suf]);
+    else ins.push([b.start,"{"+pre],[b.end,suf+"}"]);
+  });
+  let s=src;
+  ins.map((x,i)=>[x[0],x[1],i]).sort((a,b)=>b[0]-a[0]||a[2]-b[2]).forEach(([p,t])=>{s=s.slice(0,p)+t+s.slice(p)});
+  return s;
+}
+
+
+const AF=Object.getPrototypeOf(async function(){}).constructor;
+const QX={"Sum of digits":["n = 12345","15  (1+2+3+4+5)"],"Even or odd without %":["n = 7","odd"],"Prime number check":["n = 17","true"],"Factorial (loop and recursion)":["n = 5","120"],"First N Fibonacci numbers":["n = 6","0 1 1 2 3 5"],"Reverse a number":["n = 1234","4321"],"Palindrome number":["n = 121","true"],"Armstrong number":["n = 153","true  (1³+5³+3³ = 153)"],"GCD of two numbers":["a = 12, b = 18","6"],"Reverse string without reverse()":["'hello'","'olleh'"],"Palindrome string":["'madam'","true"],"Count vowels and consonants":["'hello'","vowels: 2, consonants: 3"],"First non-repeating character":["'swiss'","'w'"],"Anagram check":["'listen', 'silent'","true"],"Largest and smallest":["[3, 9, 1, 7]","max: 9, min: 1"],"Second largest":["[3, 9, 1, 7]","7"],"Remove duplicates":["[1, 2, 2, 3, 1]","[1, 2, 3]"],"Two Sum":["nums = [2, 7, 11, 15], target = 9","[0, 1]  (indices)"],"Binary search":["[1, 3, 5, 7, 9], target = 7","3  (index, -1 if missing)"],"Bubble sort":["[5, 2, 9, 1]","[1, 2, 5, 9]"],"Merge two sorted arrays":["[1, 3, 5] and [2, 4, 6]","[1, 2, 3, 4, 5, 6]"],"Frequency of each element":["['a', 'b', 'a']","{ a: 2, b: 1 }"],"Kadane max subarray":["[-2, 1, -3, 4, -1, 2, 1]","6  (subarray [4, -1, 2, 1])"],"Missing number 1 to N":["[1, 2, 4, 5]","3"],"Move zeros to end":["[0, 1, 0, 3]","[1, 3, 0, 0]"],"Rotate array by K":["[1, 2, 3, 4, 5], k = 2","[4, 5, 1, 2, 3]"],"Capitalize each word":["'hello world'","'Hello World'"],"Star pyramid":["n = 3","  *\n ***\n*****"],"Tower of Hanoi":["n = 3","7 moves"],"Array.prototype.map":["[1, 2, 3], x => x * 2","[2, 4, 6]"],"Valid parentheses for N pairs":["n = 2","['(())', '()()']"]};
+const CI={
+"Numbers":["A number in JS is a 64-bit floating-point value. Integers are exact up to 2^53 − 1 (Number.MAX_SAFE_INTEGER).","% (remainder), Math.floor / trunc / sqrt / pow, Number.isInteger. Peel digits with n % 10 and n = Math.floor(n / 10).","Input: one or two numbers. Output: a number, boolean or string printed with console.log.","0, 1, negative numbers, very large numbers, decimals."],
+"Strings":["A string is an immutable, zero-indexed sequence of characters. s[0] is the first character, s.length is the size.","length, s[i], charAt, slice, split, join, includes, indexOf, toUpperCase, replace, charCodeAt.","Input: a string or sentence. Output: a string, boolean, count or object.","Empty string, one character, spaces, upper/lower case, special characters."],
+"Arrays":["An array is an ordered, zero-indexed list of values. Indexes run from 0 to length − 1 and it can hold any type.","push/pop O(1), shift/unshift O(n), slice (copy), splice (mutates), map, filter, reduce, sort((a, b) => a − b), indexOf, includes, spread [...a].","Input: an array (sometimes a target or K). Output: a new array, a value, an index or a boolean.","Empty array, one element, duplicates, negatives, already sorted, K larger than length."],
+"Objects, Maps, Sets":["An object stores key-value pairs. A Map accepts any key type and keeps insertion order. A Set stores unique values only.","Object.keys/values/entries, spread {...o}, Map get/set/has/delete, Set add/has, for...of.","Input: an array or object. Output: an object, Map, Set or boolean.","Empty object, nested objects, missing keys, null values."],
+"Sorting and Searching":["Sorting arranges values in order; searching finds a position. Binary search needs a sorted array and halves the range each step.","Math.floor((lo + hi) / 2), swap with [a[i], a[j]] = [a[j], a[i]], comparator (a, b) => a − b.","Input: an array (and a target). Output: a sorted array or an index (−1 if missing).","Empty array, duplicates, target missing, one element."],
+"Recursion and Patterns":["Recursion means a function calls itself on a smaller problem. It needs a base case and a recursive case.","Base case, call stack, nested loops for rows and columns, string repeat().","Input: a size n. Output: printed rows or a list of results.","n = 0, n = 1, very deep recursion (stack overflow)."],
+"JS-Specific":["These questions re-implement core JS features. They test closures, this binding, callbacks and promises.","Closures, call/apply/bind, Promise, setTimeout, rest/spread arguments, Function.length.","Input: functions and callbacks. Output: a new function or promise that behaves like the built-in.","No arguments, undefined this, errors and rejections, calling many times."],
+"Adv Arrays":["Advanced array problems use patterns: two pointers, sliding window, prefix sum, hash map, stack and in-place swaps to beat O(n²).","Two pointers, window [l, r], prefix sums, Map of seen values, monotonic stack.","Input: an array and a target or window size K. Output: a value, indices or a transformed array.","Negatives, all values equal, empty array, K = 1, K = length."],
+"Adv Matrix and 2D":["A matrix is an array of arrays: m[row][col]. Rows = m.length, columns = m[0].length.","Nested loops, direction array [[0,1],[1,0],[0,-1],[-1,0]], BFS queue, DFS recursion, in-place swap.","Input: a 2D array. Output: a new matrix, a list of values or a count.","1×1 matrix, a single row or column, non-square matrix."],
+"Adv Hash Map and Frequency":["A hash map gives O(1) average lookup. Use it to count, group, remember seen values or store prefix results.","Map/object counters, Set of seen values, sorted string as key, sliding window with counts.","Input: an array or string. Output: counts, groups, indices or a boolean.","Empty input, all duplicates, all unique, negative numbers."],
+"Adv Objects":["These problems walk nested objects and arrays with recursion: clone, compare, flatten, merge, get/set by path.","typeof, Array.isArray, Object.entries, recursion, WeakMap for circular references, split('.') for paths.","Input: nested object(s) or path strings. Output: a new object, boolean or list of paths.","null, arrays inside objects, Date, circular reference, undefined values."],
+"Adv Data Structures":["A data structure organizes data for fast operations: stack (LIFO), queue (FIFO), heap, trie, graph, hash map.","class, constructor, Map plus linked order, arrays as stack/queue, adjacency list.","Input: a series of method calls. Output: the result of each call.","Empty structure, capacity 1, duplicate keys, many operations."],
+"Adv Real-World":["Real-world questions mimic daily work: filtering, sorting, pagination, normalizing API data and state management.","filter, sort with comparator chains, reduce, Object.fromEntries, immutability with spread.","Input: an array of objects plus options. Output: a new array/object without mutating the original.","Empty list, missing fields, ties in sorting, invalid page number."]};
+const FW=["Clarify: restate the problem, ask about input size, types, negatives and empty input.","Examples: walk through 2–3 samples by hand, including one edge case.","Brute force: say the simple solution first and its complexity.","Optimize: look for a pattern (hash map, two pointers, sorting, prefix sum, recursion).","Code: use clear variable names and small functions.","Test: dry-run the samples and edge cases (empty, one item, duplicates, negatives, huge input).","Complexity: state time and space in Big-O and the trade-offs.","Follow-ups: be ready for “O(1) extra space?”, “what if input is streamed?”, “what if it is async?”"];
+const BO=["O(1): array index, Map get/set","O(log n): binary search, digits of a number","O(n): one loop, building a Map","O(n log n): sort, merge sort","O(n²): nested loops, bubble sort","O(2ⁿ): all subsets, naive Fibonacci","O(n!): permutations"];
+
+async function exec(src){
+  const ev=[],stack=[],out=[],act=new Set();let cnt=0,cut=false,err=null;
+  const fm=(v,top)=>{
+    if(typeof v==="string")return top?v:JSON.stringify(v);
+    if(v===undefined)return"undefined";
+    if(typeof v==="function")return"ƒ "+v.name;
+    if(typeof v==="bigint")return v+"n";
+    if(typeof v==="number"||typeof v==="boolean"||v===null||typeof v==="symbol")return String(v);
+    if(v instanceof Error)return v.name+": "+v.message;
+    if(v instanceof Map)return"Map("+v.size+") {"+[...v].map(([a,b])=>fm(a)+" => "+fm(b)).join(", ")+"}";
+    if(v instanceof Set)return"Set("+v.size+") {"+[...v].map(x=>fm(x)).join(", ")+"}";
+    try{return JSON.stringify(v,(k,x)=>x===undefined?"undefined":typeof x==="function"?"ƒ":typeof x==="bigint"?x+"n":x instanceof Map?Object.fromEntries(x):x instanceof Set?[...x]:x)}catch(e){return String(v)}
+  };
+  const sv=v=>{const s=fm(v);return s.length>28?s.slice(0,27)+"…":s};
+  const L=p=>(...a)=>{out.push(p+a.map(x=>fm(x,1)).join(" "))};
+  const con={log:L(""),info:L(""),debug:L(""),dir:L(""),group:L(""),groupEnd(){},error:L("Error: "),warn:L("Warning: "),table:d=>out.push(fm(d)),clear(){out.length=0},assert:(c,...a)=>{if(!c)out.push("Assertion failed: "+a.map(x=>fm(x,1)).join(" "))}};
+  const sT=(f,ms,...a)=>{const id=setTimeout(()=>{act.delete(id);try{f(...a)}catch(e){err=err||String(e)}},Math.min(+ms||0,1500));act.add(id);return id};
+  const sI=(f,ms,...a)=>{let k=0;const id=setInterval(()=>{try{f(...a)}catch(e){err=err||String(e)}if(++k>=50){clearInterval(id);act.delete(id)}},Math.max(+ms||0,10));act.add(id);return id};
+  const cl=id=>{clearTimeout(id);clearInterval(id);act.delete(id)};
+  const T=(kind,label,line,vs)=>{
+    if(++cnt>20000)throw new Error("More than 20000 steps: this looks like an infinite loop. Check your loop condition.");
+    const vars=[];
+    for(const [k,f] of vs){try{const v=f();if(v!==undefined&&typeof v!=="function")vars.push([k,sv(v)])}catch(e){}}
+    let n=-1;
+    if(ev.length<3000){n=ev.length;ev.push({n,kind,label,line,d:stack.length,p:stack.length?stack[stack.length-1]:-1,vars:vars.slice(0,8)})}else cut=true;
+    stack.push(n);
+  };
+  try{await new AF("__t","__x","console","setTimeout","setInterval","clearTimeout","clearInterval",instrument(src))(T,()=>{stack.pop()},con,sT,sI,cl,cl)}
+  catch(e){err=e&&e.loc?"Line "+e.loc.line+": "+e.message.replace(/\s*\(\d+:\d+\)$/,""):String(e&&e.message||e);
+    if(/==>/.test(src))err+="\nHint: an arrow function is written with => (not ==>).";
+    else if(/=<|=>=/.test(src))err+="\nHint: check your comparison / arrow operators.";}
+  const dl=Date.now()+4000;while(act.size&&Date.now()<dl)await new Promise(r=>setTimeout(r,25));
+  act.forEach(cl);
+  return{ev,out,err,cut};
+}
+
+const chips=v=>v.map(([k,x])=>`<span class="c"><b>${esc(k)}</b>=${esc(x)}</span>`).join("");
+const nm=e=>e.kind==="fn"?"fn "+e.label+"()":e.label;
+const empty=m=>`<p class="emp">${m}</p>`;
+let rtab="tbl",pt,rid=0,el=0,lim=0,go=false,ti;
+
+/* ---------- timer ---------- */
+const fmt=s=>String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+function tdraw(){const left=lim?lim-el:el;const t=$("#tm");t.textContent=(left<0?"-":"")+fmt(Math.abs(left));t.classList.toggle("late",!!lim&&el>lim);$("#tp").textContent=go?"Pause":"Start"}
+function tset(on){go=on;clearInterval(ti);if(on)ti=setInterval(()=>{el++;tdraw()},1000);tdraw()}
+
+/* ---------- middle panel ---------- */
+function guide(){
+  const x=cur?list[cur-1]:null,c=x?CI[x.c]:null;
+  let h="";
+  if(c)h+=`<h4>Concept: ${esc(x.c)}</h4><p style="margin:2px 0">${esc(c[0])}</p><h4>Useful operations</h4><p style="margin:2px 0">${esc(c[1])}</p><h4>Edge cases to test</h4><p style="margin:2px 0">${esc(c[3])}</p>`;
+  else h+=`<p class="emp">Pick a question from the list to see its concept, useful operations and edge cases.</p>`;
+  h+=`<h4>Interview approach (step by step)</h4><ol class="g">${FW.map(f=>`<li>${esc(f)}</li>`).join("")}</ol><h4>Complexity cheat sheet</h4><ul class="g">${BO.map(f=>`<li>${esc(f)}</li>`).join("")}</ul>`;
+  return h;
+}
+function view(){
+  const r=last;if(!r)return;let h="";
+  if(tab==="out"){
+    h=r.out.length?`<pre class="out">${esc(r.out.join("\n"))}</pre>`:(r.err?"":empty("Nothing printed yet. Use console.log(...) to see output."));
+    if(r.err)h+=`<div class="err">${esc(r.err)}</div>`;
+  }else h=guide();
+  $("#res").innerHTML=h;
+}
+function qinfo(){
+  const x=cur?list[cur-1]:null;
+  if(!x){$("#qi").innerHTML=`<div><b>Free play:</b> edit the nested-loop demo or write any JavaScript. The table on the right updates live as you type.</div>`;return}
+  const c=CI[x.c],io=QX[x.t];
+  $("#qi").innerHTML=`<div><b>Concept:</b> ${esc(c[0])}</div>`+(io?`<div><b>Example input:</b> <code>${esc(io[0])}</code></div><div><b>Expected output:</b> <code>${esc(io[1])}</code></div>`:`<div><b>Input / Output:</b> ${esc(c[2])} Define your own sample data as variables.</div>`);
+}
+
+/* ---------- right panel ---------- */
+function tbl(){
+  const ev=last.ev.slice(0,500),cols=[];
+  ev.forEach(e=>e.vars.forEach(([k])=>{if(!cols.includes(k)&&cols.length<8)cols.push(k)}));
+  const prev={};
+  const rows=ev.map((e,i)=>{
+    const key=e.label+e.line,p=prev[key]||{},m=Object.fromEntries(e.vars);prev[key]=m;
+    const cells=cols.map(k=>k in m?`<td><span class="bx${p[k]!==m[k]?" chg":""}">${esc(m[k])}</span></td>`:`<td></td>`).join("");
+    return`<tr data-i="${i}" style="--c:var(--d${e.d%4})"><td>${e.n+1}</td><td class="w" style="padding-left:${8+e.d*20}px"><span class="tag">${esc(nm(e))}</span> <small>line ${e.line}</small></td>${cells}</tr>`;
+  }).join("");
+  $("#rv").innerHTML=`<table id="tb"><tr><th>Step</th><th>Loop / function</th>${cols.map(k=>`<th>${esc(k)}</th>`).join("")}</tr>${rows}</table>`+(last.ev.length>500?empty("Showing the first 500 steps."):"");
+  play();
+}
+function play(){
+  clearInterval(pt);
+  const rows=[...document.querySelectorAll("#tb tr[data-i]")],c=$("#rv");if(!rows.length)return;
+  rows.forEach(x=>x.classList.remove("vis","cur"));let i=0;
+  const step=()=>{
+    if(i>0)rows[i-1].classList.remove("cur");
+    if(i>=rows.length){clearInterval(pt);return}
+    const r=rows[i];r.classList.add("vis","cur");
+    const cr=c.getBoundingClientRect(),rr=r.getBoundingClientRect();if(rr.bottom>cr.bottom-8)c.scrollTop+=rr.bottom-cr.bottom+40;
+    $("#sc").textContent=`Step ${i+1} / ${rows.length}`;i++;
+  };
+  pt=setInterval(step,Math.max(25,Math.min(450,2500/rows.length)));step();
+}
+function showAll(){clearInterval(pt);document.querySelectorAll("#tb tr[data-i]").forEach(x=>{x.classList.add("vis");x.classList.remove("cur")});const n=document.querySelectorAll("#tb tr[data-i]").length;$("#sc").textContent=`Step ${n} / ${n}`}
+function mmap(){
+  const ev=last.ev,kids={};ev.forEach(e=>(kids[e.p]=kids[e.p]||[]).push(e));let shown=0;
+  const node=e=>{
+    if(++shown>600)return"";
+    const k=kids[e.n]||[],dl=`animation-delay:${Math.min(shown*40,2500)}ms`,hd=`<span class="nb" style="--c:var(--d${e.d%4})"><span class="tag">${esc(nm(e))}</span> ${chips(e.vars)}</span>`;
+    if(!k.length)return`<li style="${dl}">${hd}</li>`;
+    return`<li style="--c:var(--d${e.d%4});${dl}"><details${e.d<2?" open":""}><summary>${hd}<em>${k.length} inner steps</em></summary><ul>${k.map(node).join("")}</ul></details></li>`;
+  };
+  $("#rv").innerHTML=`<div class="root">Program start</div><ul class="mm">${(kids[-1]||[]).map(node).join("")}</ul>`+(ev.length>600?empty("Showing the first 600 nodes."):"");
+}
+function right(){
+  const r=last;if(!r)return;clearInterval(pt);
+  const m={};r.ev.forEach(e=>{const k=nm(e)+" · line "+e.line;m[k]=(m[k]||0)+1});
+  const md=r.ev.length?Math.max(...r.ev.map(e=>e.d))+1:0;
+  $("#st").innerHTML=r.ev.length?`<span>Max nesting: <b>${md}</b></span> `+Object.entries(m).map(([k,v])=>`<span class="c">${esc(k)} ran <b>${v}×</b></span>`).join(""):"";
+  $("#pc").style.display=rtab==="tbl"&&r.ev.length?"flex":"none";
+  if(!r.ev.length){$("#rv").innerHTML=empty("No loop or function found in this code. Write a loop and every iteration will appear here as a row, with variables as columns.");return}
+  rtab==="tbl"?tbl():mmap();
+  if(r.cut)$("#rv").insertAdjacentHTML("beforeend",empty("Recording stopped after 3000 steps."));
+}
+
+/* ---------- list, pick, events ---------- */
+async function run(){const id=++rid;const r=await exec(ed.value);if(id!==rid)return;last=r;view();right()}
+function sched(){clearTimeout(timer);timer=setTimeout(run,350)}
+function side(){
+  const f=$("#q").value.toLowerCase();let h="",c="";
+  list.forEach(x=>{
+    if(f&&!(x.l+" "+x.t).toLowerCase().includes(f))return;
+    if(x.c!==c){c=x.c;h+=`<h3>${esc(c)}</h3>`}
+    h+=`<button data-n="${x.n}" class="${x.n===cur?"on ":""}${done[x.n]?"ok":""}">${x.l}. ${esc(x.t)}${done[x.n]?" ✓":""}</button>`;
+  });
+  $("#lst").innerHTML=`<button data-n="0" class="${cur===0?"on":""}">Free play (nested loop demo)</button>`+h;
+}
+function dnBtn(){$("#dn").textContent=done[cur]?`Solved ✓ ${fmt(done[cur])} (undo)`:"Mark solved";$("#dn").style.display=cur?"":"none"}
+function pick(n){
+  cur=n;const x=list[n-1],io=x&&QX[x.t];
+  const st=x?`// Q${x.l}. ${x.t}\n`+(io?`// Example input : ${io[0].replace(/\n/g," ")}\n// Expected output: ${io[1].replace(/\n/g," ")}\n`:"")+`// Write your solution below and use console.log to see the output.\n\n`:"";
+  ed.value=LS.get("ll:q"+n)||(n?st:DEMO);
+  $("#ttl").textContent=n?`Q${x.l}. ${x.t}`:"Free play";
+  el=done[n]>0?+done[n]:0;tset(!done[n]);
+  qinfo();dnBtn();side();run();
+}
+$("#lst").addEventListener("click",e=>{const b=e.target.closest("button");if(b)pick(+b.dataset.n)});
+$("#q").addEventListener("input",side);
+ed.addEventListener("input",()=>{LS.set("ll:q"+cur,ed.value);sched()});
+ed.addEventListener("keydown",e=>{if(e.key==="Tab"){e.preventDefault();const s=ed.selectionStart;ed.setRangeText("  ",s,ed.selectionEnd,"end");ed.dispatchEvent(new Event("input"))}});
+$("#run").onclick=run;
+$("#dn").onclick=()=>{if(done[cur]){delete done[cur];tset(true)}else{done[cur]=Math.max(el,1);tset(false)}LS.set("ll:done",JSON.stringify(done));dnBtn();side()};
+$("#tp").onclick=()=>tset(!go);
+$("#tr").onclick=()=>{el=0;tset(true)};
+$("#tc").onchange=e=>{lim=+e.target.value;tdraw()};
+$("#pl").onclick=play;$("#sk").onclick=showAll;
+$("#th").onclick=()=>{const r=document.documentElement,d=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;r.dataset.theme=d?"light":"dark"};
+$("#mt").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;tab=b.dataset.t;document.querySelectorAll("#mt button").forEach(x=>x.classList.toggle("on",x===b));view()});
+$("#rt").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;rtab=b.dataset.t;document.querySelectorAll("#rt button").forEach(x=>x.classList.toggle("on",x===b));right()});
+pick(0);
+</script>
+<script>
+/* ===== Logic Lab v2 add-on: Reveal solutions, Concepts, JS Basics ===== */
+const L=(...a)=>a.join("\n");
+const SOL={
+"Reverse a number":[L("let n = 1234, r = 0;","while (n > 0) {","  r = r * 10 + (n % 10);","  n = (n - (n % 10)) / 10;","}","console.log(r);"),L("const rev = n => +[...String(n)].reverse().join(\"\");","console.log(rev(1234));")],
+"Prime number check":[L("let n = 17, prime = n > 1;","for (let i = 2; i * i <= n; i++) {","  if (n % i === 0) { prime = false; break; }","}","console.log(prime);"),L("const isPrime = n => n > 1 &&","  Array.from({ length: Math.floor(Math.sqrt(n)) - 1 }, (_, i) => i + 2)","    .every(d => n % d !== 0);","console.log(isPrime(17));")],
+"Reverse string without reverse()":[L("const s = \"hello\";","let r = \"\";","for (let i = s.length - 1; i >= 0; i--) {","  r += s[i];","}","console.log(r);"),L("const s = \"hello\";","console.log([...s].reduceRight((acc, ch) => acc + ch, \"\"));")],
+"Palindrome string":[L("const s = \"madam\";","let ok = true, i = 0, j = s.length - 1;","while (i < j) {","  if (s[i] !== s[j]) { ok = false; break; }","  i++; j--;","}","console.log(ok);"),L("const isPal = s => s === [...s].reverse().join(\"\");","console.log(isPal(\"madam\"));")],
+"Largest and smallest":[L("const a = [3, 9, 1, 7];","let max = a[0], min = a[0];","for (let i = 1; i < a.length; i++) {","  if (a[i] > max) max = a[i];","  if (a[i] < min) min = a[i];","}","console.log(max, min);"),L("const a = [3, 9, 1, 7];","console.log(Math.max(...a), Math.min(...a));")],
+"Remove duplicates":[L("const a = [1, 2, 2, 3, 1], out = [];","for (let i = 0; i < a.length; i++) {","  let found = false;","  for (let j = 0; j < out.length; j++) {","    if (out[j] === a[i]) { found = true; break; }","  }","  if (!found) out[out.length] = a[i];","}","console.log(out);"),L("const a = [1, 2, 2, 3, 1];","console.log([...new Set(a)]);")],
+"Two Sum":[L("const nums = [2, 7, 11, 15], target = 9;","for (let i = 0; i < nums.length; i++) {","  for (let j = i + 1; j < nums.length; j++) {","    if (nums[i] + nums[j] === target) console.log([i, j]);","  }","}"),L("// O(n) with Map","const twoSum = (nums, target) => {","  const seen = new Map();","  for (const [i, n] of nums.entries()) {","    if (seen.has(target - n)) return [seen.get(target - n), i];","    seen.set(n, i);","  }","  return [];","};","console.log(twoSum([2, 7, 11, 15], 9));")],
+"Frequency of each element":[L("const a = [\"a\", \"b\", \"a\"], f = {};","for (let i = 0; i < a.length; i++) {","  f[a[i]] = (f[a[i]] || 0) + 1;","}","console.log(f);"),L("const a = [\"a\", \"b\", \"a\"];","console.log(a.reduce((m, x) => ({ ...m, [x]: (m[x] ?? 0) + 1 }), {}));")],
+"Move zeros to end":[L("const a = [0, 1, 0, 3];","let k = 0;","for (let i = 0; i < a.length; i++) {","  if (a[i] !== 0) { a[k] = a[i]; k++; }","}","for (let i = k; i < a.length; i++) a[i] = 0;","console.log(a);"),L("const a = [0, 1, 0, 3];","console.log([...a.filter(Boolean), ...a.filter(x => !x)]);")],
+"Flatten nested array (no flat)":[L("function flat(arr) {","  const out = [];","  for (let i = 0; i < arr.length; i++) {","    if (Array.isArray(arr[i])) {","      const inner = flat(arr[i]);","      for (let j = 0; j < inner.length; j++) out[out.length] = inner[j];","    } else out[out.length] = arr[i];","  }","  return out;","}","console.log(flat([1, [2, [3, [4]]]]));"),L("const flat = a => a.reduce((acc, x) =>","  Array.isArray(x) ? [...acc, ...flat(x)] : [...acc, x], []);","console.log(flat([1, [2, [3, [4]]]]));")],
+"Array.prototype.map":[L("function myMap(arr, fn) {","  const out = [];","  for (let i = 0; i < arr.length; i++) out[i] = fn(arr[i], i, arr);","  return out;","}","console.log(myMap([1, 2, 3], x => x * 2));"),L("Array.prototype.myMap = function (fn, thisArg) {","  if (typeof fn !== \"function\") throw new TypeError(fn + \" is not a function\");","  const out = new Array(this.length);","  for (let i = 0; i < this.length; i++) {","    if (i in this) out[i] = fn.call(thisArg, this[i], i, this);","  }","  return out;","};","console.log([1, 2, 3].myMap(x => x * 2));")],
+"debounce and throttle":[L("function debounce(fn, ms) {","  let id;","  return function (a) {","    clearTimeout(id);","    id = setTimeout(() => fn(a), ms);","  };","}","const d = debounce(v => console.log(\"run\", v), 100);","d(1); d(2); d(3); // only 3 runs"),L("const debounce = (fn, ms) => {","  let id;","  return function (...args) {","    clearTimeout(id);","    id = setTimeout(() => fn.apply(this, args), ms);","  };","};","const throttle = (fn, ms) => {","  let last = 0;","  return function (...args) {","    const now = Date.now();","    if (now - last >= ms) { last = now; fn.apply(this, args); }","  };","};","const t = throttle(v => console.log(\"throttled\", v), 100);","t(1); t(2); t(3); // only 1 runs")]
+};
+const CON=[
+["Hoisting","Declarations move to the top of their scope before code runs. var is set to undefined, function declarations are fully available, let/const are hoisted but locked (see TDZ).",L("console.log(a);        // undefined (var hoisted)","var a = 5;","console.log(hi());     // works: function declaration hoisted","function hi() { return \"hi\"; }","try { bye(); } catch (e) { console.log(e.message); } // expression not hoisted","var bye = function () {};")],
+["TDZ (Temporal Dead Zone)","Time between entering a scope and the let/const line. Reading the variable there throws ReferenceError.",L("try {","  console.log(x);   // ReferenceError","  let x = 1;","} catch (e) { console.log(e.name + \": \" + e.message); }","console.log(typeof undeclared); // \"undefined\", no error")],
+["Closure","A function remembers the variables of the scope where it was created, even after that scope ended.",L("function counter() {","  let n = 0;","  return () => ++n;","}","const c = counter();","console.log(c(), c(), c()); // 1 2 3","// classic loop trap: var shares one i, let makes a new i per loop","for (var i = 0; i < 3; i++) setTimeout(() => console.log(\"var\", i), 0);","for (let j = 0; j < 3; j++) setTimeout(() => console.log(\"let\", j), 0);")],
+["Callback","A function passed to another function to be called later (sync or async). Too much nesting = callback hell; Promises fix it.",L("function getUser(id, cb) {","  setTimeout(() => cb(null, { id, name: \"Ali\" }), 50);","}","getUser(1, (err, user) => {","  if (err) return console.log(err);","  console.log(user);","});","console.log(\"runs first\");")],
+["Event Loop","Sync code runs first, then microtasks (Promise.then), then macrotasks (setTimeout).",L("console.log(1);","setTimeout(() => console.log(4), 0);","Promise.resolve().then(() => console.log(3));","console.log(2);","// order: 1 2 3 4")],
+["this keyword","this depends on HOW a function is called. Arrow functions take this from the surrounding scope.",L("const o = {","  n: \"obj\",","  normal() { return this.n; },","  arrow: () => typeof this,","};","console.log(o.normal());","const f = o.normal;","try { console.log(f()); } catch (e) { console.log(\"lost this\"); }","console.log(f.call({ n: \"call\" }));")],
+["Promise and async/await","A Promise is a future value: pending, fulfilled or rejected. async/await is cleaner syntax over Promises.",L("const wait = (ms, v) => new Promise(r => setTimeout(() => r(v), ms));","async function main() {","  try {","    const [a, b] = await Promise.all([wait(50, \"A\"), wait(80, \"B\")]);","    console.log(a, b);","    await Promise.reject(new Error(\"fail\"));","  } catch (e) { console.log(\"caught:\", e.message); }","}","main();")]
+];
+const BAS={
+Array:[
+["push()","Adds items at the end. Returns the new length. Mutates the array.",L("const a = [1, 2];","a[a.length] = 3;   // custom push","console.log(a);"),L("const a = [1, 2];","const b = [...a, 3]; // ES6: new array, no mutation","a.push(3, 4);        // method, mutates","console.log(a, b);")],
+["pop()","Removes and returns the last item.",L("const a = [1, 2, 3];","const last = a[a.length - 1];","a.length = a.length - 1;","console.log(last, a);"),L("const a = [1, 2, 3];","console.log(a.pop(), a);","console.log(a.at(-1)); // ES2022: read last item")],
+["map()","Makes a NEW array by transforming each item.",L("const a = [1, 2, 3], out = [];","for (let i = 0; i < a.length; i++) out[i] = a[i] * 2;","console.log(out);"),L("console.log([1, 2, 3].map(x => x * 2));")],
+["filter()","Keeps only items where the callback returns true.",L("const a = [1, 2, 3, 4], out = [];","for (let i = 0; i < a.length; i++) {","  if (a[i] % 2 === 0) out[out.length] = a[i];","}","console.log(out);"),L("console.log([1, 2, 3, 4].filter(x => x % 2 === 0));")],
+["reduce()","Folds the array into one value (sum, object, count).",L("const a = [1, 2, 3];","let sum = 0;","for (let i = 0; i < a.length; i++) sum += a[i];","console.log(sum);"),L("console.log([1, 2, 3].reduce((acc, x) => acc + x, 0));")],
+["includes()","true if the value exists. Uses strict equality (and handles NaN).",L("const a = [1, 2, 3];","let found = false;","for (let i = 0; i < a.length; i++) {","  if (a[i] === 2) { found = true; break; }","}","console.log(found);"),L("console.log([1, 2, 3].includes(2), [NaN].includes(NaN));")]],
+String:[
+["slice()","Returns part of a string (start, end exclusive). Negative index counts from the end.",L("const s = \"javascript\";","let out = \"\";","for (let i = 0; i < 4; i++) out += s[i];","console.log(out);"),L("console.log(\"javascript\".slice(0, 4), \"javascript\".slice(-6));")],
+["split()","Breaks a string into an array.",L("const s = \"a-b-c\", out = [];","let cur = \"\";","for (let i = 0; i < s.length; i++) {","  if (s[i] === \"-\") { out[out.length] = cur; cur = \"\"; }","  else cur += s[i];","}","out[out.length] = cur;","console.log(out);"),L("console.log(\"a-b-c\".split(\"-\"), [...\"abc\"]);")],
+["includes()","true if the text contains the substring.",L("const s = \"hello world\", t = \"world\";","let found = false;","for (let i = 0; i <= s.length - t.length; i++) {","  let m = true;","  for (let j = 0; j < t.length; j++) {","    if (s[i + j] !== t[j]) { m = false; break; }","  }","  if (m) { found = true; break; }","}","console.log(found);"),L("console.log(\"hello world\".includes(\"world\"));")],
+["toUpperCase()","Returns a new uppercase string. Strings are immutable.",L("const s = \"abc\";","let out = \"\";","for (let i = 0; i < s.length; i++) {","  const c = s.charCodeAt(i);","  out += c >= 97 && c <= 122 ? String.fromCharCode(c - 32) : s[i];","}","console.log(out);"),L("console.log(\"abc\".toUpperCase());")]],
+Object:[
+["Object.keys()","Array of own enumerable keys.",L("const o = { a: 1, b: 2 }, keys = [];","for (const k in o) {","  if (Object.prototype.hasOwnProperty.call(o, k)) keys[keys.length] = k;","}","console.log(keys);"),L("console.log(Object.keys({ a: 1, b: 2 }));")],
+["Object.entries()","Array of [key, value] pairs. Pair with Object.fromEntries to rebuild.",L("const o = { a: 1, b: 2 };","for (const k in o) console.log(k, o[k]);"),L("const o = { a: 1, b: 2 };","for (const [k, v] of Object.entries(o)) console.log(k, v);","console.log(Object.fromEntries(Object.entries(o).map(([k, v]) => [k, v * 10])));")],
+["Spread / merge","Shallow copy or merge. Later keys win. Nested objects are still shared.",L("const a = { x: 1 }, b = { y: 2 }, m = {};","for (const k in a) m[k] = a[k];","for (const k in b) m[k] = b[k];","console.log(m);"),L("const a = { x: 1 }, b = { y: 2 };","console.log({ ...a, ...b }, Object.assign({}, a, b));")]],
+Number:[
+["Number.isInteger()","true only for whole numbers (no coercion).",L("const n = 5.5;","console.log(n - (n % 1) === n);"),L("console.log(Number.isInteger(5), Number.isInteger(5.5));")],
+["parseInt() / Number()","Convert text to number. parseInt stops at the first bad char; Number is strict.",L("const s = \"123\";","let n = 0;","for (let i = 0; i < s.length; i++) n = n * 10 + (s.charCodeAt(i) - 48);","console.log(n);"),L("console.log(parseInt(\"12px\"), Number(\"12px\"), +\"42\");")],
+["toFixed()","Rounds to N decimals and returns a STRING. Floating-point caveat: 0.1 + 0.2 !== 0.3.",L("const n = 3.14159;","console.log(Math.round(n * 100) / 100);"),L("console.log((3.14159).toFixed(2), 0.1 + 0.2 === 0.3, Math.abs(0.1 + 0.2 - 0.3) < Number.EPSILON);")]]
+};
+const REG=[];let pg=1,sub="Array",sTab=0,sOpen=false;
+const tryCode=c=>{showPg(1);pick(0);ed.value=c;run()};
+function solRender(){
+  const b=$("#sol"),x=cur?list[cur-1]:null;
+  if(!sOpen){b.hidden=true;$("#rvl").textContent="Reveal solution";return}
+  b.hidden=false;$("#rvl").textContent="Hide solution";
+  const s=x&&SOL[x.t];
+  if(!x){b.innerHTML=empty("Pick a question first.");return}
+  if(!s){b.innerHTML=empty("Solution for this question is not added yet. Try it yourself first, then ask for the next batch.");return}
+  b.innerHTML=`<div class="tabs"><button data-s="0" class="${sTab?"":"on"}">Custom (loops only)</button><button data-s="1" class="${sTab?"on":""}">Advanced (methods)</button></div><pre class="cb">${esc(s[sTab])}</pre><button class="b p" data-load="1">Load into editor</button>`;
+}
+$("#rvl").onclick=()=>{sOpen=!sOpen;solRender()};
+$("#sol").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.s!==undefined){sTab=+b.dataset.s;solRender()}else if(b.dataset.load){ed.value=SOL[list[cur-1].t][sTab];LS.set("ll:q"+cur,ed.value);run()}});
+$("#lst").addEventListener("click",()=>{sOpen=false;solRender()});
+function card(t,d,codes){
+  const blocks=codes.map(([lbl,c])=>{REG.push(c);return`<div class="lb">${lbl}</div><pre class="cb">${esc(c)}</pre><button class="b" data-r="${REG.length-1}">Try in editor</button>`}).join("");
+  return`<article class="cd"><h4>${esc(t)}</h4><p>${esc(d)}</p>${blocks}</article>`;
+}
+function renderRef(){
+  REG.length=0;let h="";
+  if(pg===2)h=`<p class="emp">Core JS ideas, each with runnable code.</p>`+CON.map(([t,d,c])=>card(t,d,[["Example",c]])).join("");
+  else h=`<div class="tabs" id="sb">${Object.keys(BAS).map(k=>`<button data-k="${k}" class="${k===sub?"on":""}">${k}</button>`).join("")}</div>`+BAS[sub].map(([t,d,c,m])=>card(t,d,[["Custom version (loop only)",c],["Modern / ES6 version",m]])).join("");
+  $("#pg2").innerHTML=`<div class="rf">${h}</div>`;
+}
+$("#pg2").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.r)tryCode(REG[+b.dataset.r]);else if(b.dataset.k){sub=b.dataset.k;renderRef()}});
+function showPg(p){pg=p;$("#pg1").hidden=p!==1;$("#pg2").hidden=p===1;document.querySelectorAll("#pgn button").forEach(x=>x.classList.toggle("on",+x.dataset.p===p));if(p>1)renderRef()}
+$("#pgn").addEventListener("click",e=>{const b=e.target.closest("button");if(b)showPg(+b.dataset.p)});
+ed.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();run()}});
+</script>
+<script>
+/* ===== Batch 2: Numbers solutions, more Concepts/Basics, animated UI ===== */
+Object.assign(SOL,{
+"Even or odd without %":[L(`let n = 7, x = n;`,`while (x >= 2) x -= 2;`,`console.log(x === 0 ? "even" : "odd");`),L(`const isEven = n => (n & 1) === 0;`,`console.log(isEven(7) ? "even" : "odd");`)],
+"Print primes up to N":[L(`const N = 20;`,`for (let n = 2; n <= N; n++) {`,`  let p = true;`,`  for (let i = 2; i * i <= n; i++) {`,`    if (n % i === 0) { p = false; break; }`,`  }`,`  if (p) console.log(n);`,`}`),L(`// Sieve of Eratosthenes, O(n log log n)`,`const sieve = N => {`,`  const s = new Array(N + 1).fill(true);`,`  s[0] = s[1] = false;`,`  for (let i = 2; i * i <= N; i++)`,`    if (s[i]) for (let j = i * i; j <= N; j += i) s[j] = false;`,`  return s.reduce((a, v, i) => (v ? [...a, i] : a), []);`,`};`,`console.log(sieve(20));`)],
+"Factorial (loop and recursion)":[L(`const n = 5;`,`let r = 1;`,`for (let i = 2; i <= n; i++) r *= i;`,`console.log(r);`,`function fact(k) {`,`  if (k <= 1) return 1;   // base case`,`  return k * fact(k - 1);`,`}`,`console.log(fact(n));`),L(`// BigInt avoids precision loss for big n`,`const fact = n => Array.from({ length: n }, (_, i) => BigInt(i + 1)).reduce((a, b) => a * b, 1n);`,`console.log(fact(25));`)],
+"First N Fibonacci numbers":[L(`const n = 6;`,`let a = 0, b = 1, out = "";`,`for (let i = 0; i < n; i++) {`,`  out += a + " ";`,`  const next = a + b;`,`  a = b;`,`  b = next;`,`}`,`console.log(out);`),L(`function* fib() {`,`  let [a, b] = [0, 1];`,`  while (true) { yield a; [a, b] = [b, a + b]; }`,`}`,`const out = [];`,`for (const x of fib()) { if (out.length === 6) break; out.push(x); }`,`console.log(out);`)],
+"Palindrome number":[L(`const n = 121;`,`let t = n, r = 0;`,`while (t > 0) { r = r * 10 + (t % 10); t = (t - (t % 10)) / 10; }`,`console.log(r === n);`),L(`const isPal = n => { const s = String(n); return s === [...s].reverse().join(""); };`,`console.log(isPal(121), isPal(123));`)],
+"Sum of digits":[L(`let n = 12345, sum = 0;`,`while (n > 0) {`,`  sum += n % 10;`,`  n = (n - (n % 10)) / 10;`,`}`,`console.log(sum);`),L(`const sumDigits = n => [...String(Math.abs(n))].reduce((a, d) => a + +d, 0);`,`console.log(sumDigits(12345));`)],
+"Armstrong number":[L(`const n = 153;`,`let digits = 0, t = n;`,`while (t > 0) { digits++; t = (t - (t % 10)) / 10; }`,`let sum = 0; t = n;`,`while (t > 0) {`,`  const d = t % 10;`,`  let p = 1;`,`  for (let i = 0; i < digits; i++) p *= d;`,`  sum += p;`,`  t = (t - d) / 10;`,`}`,`console.log(sum === n);`),L(`const isArm = n => {`,`  const s = String(n);`,`  return [...s].reduce((a, d) => a + d ** s.length, 0) === n;`,`};`,`console.log(isArm(153), isArm(154));`)],
+"GCD of two numbers":[L(`let a = 12, b = 18;`,`while (b !== 0) {`,`  const t = b;`,`  b = a % b;`,`  a = t;`,`}`,`console.log(a);`),L(`const gcd = (a, b) => (b ? gcd(b, a % b) : a);`,`console.log(gcd(12, 18));`,`console.log([12, 18, 24].reduce(gcd)); // many numbers`)],
+"LCM of two numbers":[L(`let a = 4, b = 6, x = a, y = b;`,`while (y !== 0) { const t = y; y = x % y; x = t; }`,`console.log((a * b) / x);`),L(`const gcd = (a, b) => (b ? gcd(b, a % b) : a);`,`const lcm = (a, b) => (a / gcd(a, b)) * b;`,`console.log(lcm(4, 6), [2, 3, 4, 5].reduce(lcm));`)],
+"Count digits":[L(`let n = 98765, c = 0;`,`if (n === 0) c = 1;`,`while (n > 0) { c++; n = (n - (n % 10)) / 10; }`,`console.log(c);`),L(`const count = n => (n === 0 ? 1 : Math.floor(Math.log10(Math.abs(n))) + 1);`,`console.log(count(98765));`)],
+"Decimal to binary (no toString)":[L(`let n = 10, bin = "";`,`if (n === 0) bin = "0";`,`while (n > 0) {`,`  bin = (n % 2) + bin;`,`  n = (n - (n % 2)) / 2;`,`}`,`console.log(bin);`),L(`console.log((10).toString(2));`,`console.log((10 >>> 0).toString(2).padStart(8, "0"));`)],
+"Power of 2 check":[L(`let n = 16;`,`if (n < 1) console.log(false);`,`else {`,`  while (n % 2 === 0) n /= 2;`,`  console.log(n === 1);`,`}`),L(`// A power of 2 has exactly one bit set`,`const isPow2 = n => n > 0 && (n & (n - 1)) === 0;`,`console.log(isPow2(16), isPow2(18));`)],
+"Swap two numbers without temp":[L(`let a = 5, b = 9;`,`a = a + b;`,`b = a - b;`,`a = a - b;`,`console.log(a, b);`),L(`let a = 5, b = 9;`,`[a, b] = [b, a];`,`console.log(a, b);`)],
+"Sum of first N natural numbers":[L(`const n = 10;`,`let sum = 0;`,`for (let i = 1; i <= n; i++) sum += i;`,`console.log(sum);`),L(`const sum = n => (n * (n + 1)) / 2; // O(1)`,`console.log(sum(10));`)],
+"Largest of three without Math.max":[L(`const a = 4, b = 9, c = 6;`,`let m = a;`,`if (b > m) m = b;`,`if (c > m) m = c;`,`console.log(m);`),L(`const max = (...n) => n.reduce((m, x) => (x > m ? x : m));`,`console.log(max(4, 9, 6));`)]
+});
+CON.push(
+["Scope chain","JS looks for a variable in the current scope, then each outer scope, up to global.",L(`const g = "global";`,`function outer() {`,`  const o = "outer";`,`  function inner() { console.log(g, o); } // finds both by climbing`,`  inner();`,`}`,`outer();`)],
+["var vs let vs const","var = function scope, redeclarable. let/const = block scope. const blocks reassignment, not mutation.",L(`if (true) { var a = 1; let b = 2; }`,`console.log(a, typeof b);`,`const o = { x: 1 };`,`o.x = 2;              // allowed`,`try { o = {}; } catch (e) { console.log(e.name); }`)],
+["Currying","Turn f(a, b, c) into f(a)(b)(c). Built on closures.",L(`const curry = fn => function c(...a) {`,`  return a.length >= fn.length ? fn(...a) : (...b) => c(...a, ...b);`,`};`,`const add = curry((a, b, c) => a + b + c);`,`console.log(add(1)(2)(3), add(1, 2)(3));`)],
+["Memoization","Cache results of a pure function by its arguments.",L(`const memo = fn => {`,`  const cache = new Map();`,`  return n => cache.has(n) ? cache.get(n) : (cache.set(n, fn(n)), cache.get(n));`,`};`,`const fib = memo(n => (n < 2 ? n : fib(n - 1) + fib(n - 2)));`,`console.log(fib(50));`)],
+["Prototype chain","Objects inherit from their prototype. A missing property is searched up the chain until null.",L(`function Animal(n) { this.n = n; }`,`Animal.prototype.speak = function () { return this.n + " makes a sound"; };`,`const d = new Animal("Dog");`,`console.log(d.speak(), d.hasOwnProperty("speak"));`,`console.log(Object.getPrototypeOf(d) === Animal.prototype);`)],
+["Destructuring, spread, rest","Unpack values, copy/merge, and collect remaining items.",L(`const { a, b: { c = 9 } = {}, ...rest } = { a: 1, x: 2, y: 3 };`,`console.log(a, c, rest);`,`const [first, , third, ...others] = [1, 2, 3, 4, 5];`,`console.log(first, third, others);`,`const sum = (...n) => n.reduce((s, x) => s + x, 0);`,`console.log(sum(...[1, 2, 3]));`)]
+);
+BAS.Array.push(
+["find() / findIndex()","First matching item (or index). undefined / -1 if none.",L(`const a = [5, 12, 8];`,`let found;`,`for (let i = 0; i < a.length; i++) { if (a[i] > 10) { found = a[i]; break; } }`,`console.log(found);`),L(`const a = [5, 12, 8];`,`console.log(a.find(x => x > 10), a.findIndex(x => x > 10));`)],
+["some() / every()","some = at least one passes. every = all pass.",L(`const a = [1, 2, 3];`,`let some = false, every = true;`,`for (let i = 0; i < a.length; i++) {`,`  if (a[i] > 2) some = true;`,`  if (!(a[i] > 0)) every = false;`,`}`,`console.log(some, every);`),L(`const a = [1, 2, 3];`,`console.log(a.some(x => x > 2), a.every(x => x > 0));`)],
+["sort()","Sorts IN PLACE. Default is by string, so always pass a comparator for numbers.",L(`const a = [10, 9, 1];`,`for (let i = 0; i < a.length; i++)`,`  for (let j = 0; j < a.length - i - 1; j++)`,`    if (a[j] > a[j + 1]) { const t = a[j]; a[j] = a[j + 1]; a[j + 1] = t; }`,`console.log(a);`),L(`console.log([10, 9, 1].sort());              // [1, 10, 9] wrong`,`console.log([10, 9, 1].sort((a, b) => a - b)); // [1, 9, 10]`,`console.log([10, 9, 1].toSorted((a, b) => b - a)); // ES2023, no mutation`)],
+["slice() vs splice()","slice copies a range (no mutation). splice removes/inserts in place.",L(`const a = [1, 2, 3, 4], part = [];`,`for (let i = 1; i < 3; i++) part[part.length] = a[i];`,`console.log(part, a);`),L(`const a = [1, 2, 3, 4];`,`console.log(a.slice(1, 3), a);`,`console.log(a.splice(1, 2, "x"), a);`)],
+["flat() / flatMap()","flat(depth) flattens nested arrays. flatMap = map then flat(1).",L(`const a = [1, [2, [3]]], out = [];`,`const walk = x => { for (let i = 0; i < x.length; i++) Array.isArray(x[i]) ? walk(x[i]) : out.push(x[i]); };`,`walk(a);`,`console.log(out);`),L(`console.log([1, [2, [3]]].flat(Infinity));`,`console.log(["a b", "c"].flatMap(s => s.split(" ")));`)],
+["Array.from()","Builds an array from any iterable or a length.",L(`const out = [];`,`for (let i = 0; i < 5; i++) out[i] = i * i;`,`console.log(out);`),L(`console.log(Array.from({ length: 5 }, (_, i) => i * i));`,`console.log(Array.from("abc"), Array.from(new Set([1, 1, 2])));`)]
+);
+document.head.insertAdjacentHTML("beforeend",`<style>
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes flow{to{background-position:300% 0}}
+.top h1{background:linear-gradient(90deg,var(--ac),var(--d1),var(--d2),var(--ac));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 9s linear infinite;display:inline-block}
+#pg1:not([hidden]),#pg2:not([hidden]){animation:rise .4s ease}
+#sol:not([hidden]){animation:rise .3s ease}
+.cd{animation:rise .5s ease backwards;transition:transform .2s,box-shadow .2s,border-color .2s}
+.cd:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,0,0,.12);border-color:var(--ac)}
+button.b{transition:transform .15s,background .2s,box-shadow .2s}button.b:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.12)}button.b:active{transform:scale(.96)}
+aside button{transition:background .15s,padding-left .15s}aside button:hover{padding-left:10px}
+#pgn button,.tabs button{transition:color .2s,border-color .2s}
+#pbar{height:6px;background:var(--ln);border-radius:9px;margin:10px 0 0;max-width:420px;overflow:hidden}#pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ac),var(--d2));transition:width .6s ease}
+#ptx{font-size:12.5px;color:var(--mu);margin-top:3px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>`);
+document.querySelector(".top").insertAdjacentHTML("beforeend",`<div id="pbar"><i></i></div><div id="ptx"></div>`);
+function prog(){const n=Object.keys(done).length;document.querySelector("#pbar i").style.width=(n/list.length*100)+"%";$("#ptx").textContent=n+" / "+list.length+" solved · "+Object.keys(SOL).length+" reveal solutions ready";}
+const _side=side;side=function(){_side();prog()};
+const _rr=renderRef;renderRef=function(){_rr();document.querySelectorAll(".cd").forEach((c,i)=>{c.style.animationDelay=Math.min(i*40,600)+"ms"})};
+prog();
+</script>
+</body>
+</html>
