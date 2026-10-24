@@ -5,6 +5,8 @@
 <meta name="description" content="Logic Lab: JavaScript practice with live loop tables, real-world problems and interview mode.">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Logic Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%230B6E99%27/%3E%3Ctext x=%2716%27 y=%2722%27 font-size=%2716%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27monospace%27%3E%7B%7D%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
 :root{--bg:#F1F4F2;--pn:#fff;--ink:#16222B;--mu:#5A6A75;--ln:#D3DBDF;--ac:#0B6E99;--er:#B42318;--d0:#0B6E99;--d1:#7C3AED;--d2:#0F8A5F;--d3:#C2410C;--mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -62,6 +64,7 @@ select.b{padding:6px 8px}
 .qi div{margin:3px 0}.qi b{color:var(--ac)}.qi code{font:12.5px var(--mono);background:var(--bg);padding:0 5px;border-radius:4px;white-space:pre-wrap}
 .rp{position:sticky;top:12px;align-self:start;max-height:94vh;display:flex;flex-direction:column;background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:10px;min-width:0}
 .rp .tabs{margin-top:0}
+#mxi{margin-bottom:8px}#mxi textarea{width:100%;font:13px/1.5 var(--mono);padding:8px;border:1px solid var(--ln);border-radius:8px;background:var(--bg);color:var(--ink);resize:vertical}#mxi code{font:12.5px var(--mono)}#mxo{max-height:160px;overflow:auto;background:var(--bg);border:1px solid var(--ln);border-radius:8px;padding:8px}
 #rv{overflow:auto;flex:1;min-height:220px}
 .pc{display:flex;gap:6px;align-items:center;margin-bottom:6px;font-size:13px;color:var(--mu)}
 #st{margin-bottom:6px}
@@ -104,10 +107,10 @@ pre.cb{font:13px/1.55 var(--mono);background:var(--bg);border:1px solid var(--ln
 </main>
 <section class="rp"><nav class="tabs" id="rt"><button data-t="tbl" class="on">Loop Table</button><button data-t="map">Mind Map</button><button data-t="mat">Matrix</button></nav>
 <div class="pc" id="pc"><button class="b" id="pl">▶ Replay</button><button class="b" id="sk">Show all</button><span id="sc"></span></div>
-<div id="st"></div><div id="rv"></div></section>
+<div id="mxi" hidden><label for="mxin"><b>Value (available in your code as <code>input</code>)</b></label><textarea id="mxin" spellcheck="false" rows="2" placeholder="e.g. [[1,2,3],[4,5,6]]  or  5  or  hello"></textarea><div class="lb">console.log output</div><pre class="out" id="mxo"></pre></div><div id="st"></div><div id="rv"></div></section>
 </div>
 <div id="pg2" hidden></div>
-<script src="https://cdn.jsdelivr.net/npm/acorn@8.12.1/dist/acorn.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/acorn@8.12.1/dist/acorn.js" onerror="var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/acorn/8.12.1/acorn.min.js';document.head.appendChild(s)"></script>
 <script>
 const CATS=[["Numbers","Even or odd without %|Prime number check|Print primes up to N|Factorial (loop and recursion)|First N Fibonacci numbers|Is it a Fibonacci number|Reverse a number|Palindrome number|Sum of digits|Armstrong number|GCD of two numbers|LCM of two numbers|Perfect square check|Count digits|Decimal to binary (no toString)|Binary to decimal|Power of 2 check|Sum of first N natural numbers|Swap two numbers without temp|Largest of three without Math.max"],
 ["Strings","Reverse string without reverse()|Palindrome string|Count vowels and consonants|First non-repeating character|Most frequent character|Anagram check|Remove duplicate characters|Capitalize each word|Longest word in sentence|Count words|Reverse each word|Reverse order of words|Only digits check|Compress string (aaabbc → a3b2c1)|Longest palindromic substring|Longest substring without repeats|String rotation check|camelCase / snake_case|Remove spaces without replace|All permutations of a string"],
@@ -125,9 +128,10 @@ const CATS=[["Numbers","Even or odd without %|Prime number check|Print primes up
 const list=[];CATS.forEach(([c,s])=>s.split("|").forEach(t=>list.push({n:list.length+1,c,t,l:list.length<100?""+(list.length+1):"A"+(list.length-99)})));
 const DEMO='// Nested loop demo: 3x3 multiplication table\nfor (let i = 1; i <= 3; i++) {\n  let row = "";\n  for (let j = 1; j <= 3; j++) {\n    row += i * j + " ";\n  }\n  console.log(row);\n}\n';
 const $=s=>document.querySelector(s),ed=$("#ed");
+$("#pgn button[data-p=\"1\"]").textContent="Practice ("+list.length+")";
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 let cur=0,tab="out",last=null,timer,done={};
-try{done=JSON.parse(LS.get("ll:done")||"{}")}catch(e){}
+try{const d0=JSON.parse(LS.get("ll:done")||"{}");if(d0&&typeof d0==="object"&&!Array.isArray(d0))done=d0}catch(e){}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 function instrument(src){
@@ -146,11 +150,11 @@ function instrument(src){
     else if(FN.test(n.type)&&n.body.type==="BlockStatement"){b=n.body;kind="fn";label=(n.id&&n.id.name)||"anonymous";ns=n.params.filter(p=>p.type==="Identifier").map(p=>p.name)}
     if(!b)return;
     const pre=`__t("${kind}","${label}",${n.loc.start.line},${snap(ns)});try{`,suf="}finally{__x()}";
-    if(b.type==="BlockStatement")ins.push([b.start+1,pre],[b.end-1,suf]);
+    if(b.type==="BlockStatement"){if(!b.body.length)ins.push([b.start+1,pre+suf]);else ins.push([b.start+1,pre],[b.end-1,suf])}
     else ins.push([b.start,"{"+pre],[b.end,suf+"}"]);
   });
   let s=src;
-  ins.map((x,i)=>[x[0],x[1],i]).sort((a,b)=>b[0]-a[0]||a[2]-b[2]).forEach(([p,t])=>{s=s.slice(0,p)+t+s.slice(p)});
+  ins.map((x,i)=>[x[0],x[1],i]).sort((a,b)=>b[0]-a[0]||a[2]-b[2]).forEach(([p,t])=>{s=s.slice(0,p)+t+s.slice(p)});s+="\n;try{__f("+snap(names)+")}catch(__e){}";
   return s;
 }
 
@@ -174,8 +178,9 @@ const CI={
 const FW=["Clarify: restate the problem, ask about input size, types, negatives and empty input.","Examples: walk through 2–3 samples by hand, including one edge case.","Brute force: say the simple solution first and its complexity.","Optimize: look for a pattern (hash map, two pointers, sorting, prefix sum, recursion).","Code: use clear variable names and small functions.","Test: dry-run the samples and edge cases (empty, one item, duplicates, negatives, huge input).","Complexity: state time and space in Big-O and the trade-offs.","Follow-ups: be ready for “O(1) extra space?”, “what if input is streamed?”, “what if it is async?”"];
 const BO=["O(1): array index, Map get/set","O(log n): binary search, digits of a number","O(n): one loop, building a Map","O(n log n): sort, merge sort","O(n²): nested loops, bubble sort","O(2ⁿ): all subsets, naive Fibonacci","O(n!): permutations"];
 
-async function exec(src){
-  const ev=[],stack=[],out=[],act=new Set();let cnt=0,cut=false,err=null;
+async function exec(src,inp){
+  const ev=[],stack=[],out=[],act=new Set(),t0=Date.now();let cnt=0,cut=false,err=null;
+  if(typeof acorn==="undefined")return{ev,out,err:"Code parser (acorn) could not load. Check your internet connection and reload the page.",cut,mats:{before:{},after:{}}};
   const fm=(v,top)=>{
     if(typeof v==="string")return top?v:JSON.stringify(v);
     if(v===undefined)return"undefined";
@@ -193,21 +198,23 @@ async function exec(src){
   const sT=(f,ms,...a)=>{const id=setTimeout(()=>{act.delete(id);try{f(...a)}catch(e){err=err||String(e)}},Math.min(+ms||0,1500));act.add(id);return id};
   const sI=(f,ms,...a)=>{let k=0;const id=setInterval(()=>{try{f(...a)}catch(e){err=err||String(e)}if(++k>=50){clearInterval(id);act.delete(id)}},Math.max(+ms||0,10));act.add(id);return id};
   const cl=id=>{clearTimeout(id);clearInterval(id);act.delete(id)};
+  const mats={before:{},after:{}},is2=v=>Array.isArray(v)&&v.length>0&&v.length<=40&&v.every(r=>Array.isArray(r)&&r.length<=40&&r.every(x=>x===null||typeof x!=="object")),
+    mgrab=vs=>{for(const [k,f] of vs){try{const v=f();if(is2(v)){const c=JSON.parse(JSON.stringify(v));if(!(k in mats.before))mats.before[k]=c;mats.after[k]=c}}catch(e){}}};
   const T=(kind,label,line,vs)=>{
-    if(++cnt>20000)throw new Error("More than 20000 steps: this looks like an infinite loop. Check your loop condition.");
+    if(++cnt>3000000||((cnt&1023)===0&&Date.now()-t0>3000))throw new Error("Program ran too long (over 3 seconds or 3 million steps): this looks like an infinite loop. Check your loop condition.");
     const vars=[];
     for(const [k,f] of vs){try{const v=f();if(v!==undefined&&typeof v!=="function")vars.push([k,sv(v)])}catch(e){}}
     let n=-1;
-    if(ev.length<3000){n=ev.length;ev.push({n,kind,label,line,d:stack.length,p:stack.length?stack[stack.length-1]:-1,vars:vars.slice(0,8)})}else cut=true;
+    if(ev.length<3000){mgrab(vs);n=ev.length;ev.push({n,kind,label,line,d:stack.length,p:stack.length?stack[stack.length-1]:-1,vars:vars.slice(0,8)})}else cut=true;
     stack.push(n);
   };
-  try{await new AF("__t","__x","console","setTimeout","setInterval","clearTimeout","clearInterval",instrument(src))(T,()=>{stack.pop()},con,sT,sI,cl,cl)}
+  try{const hi=inp!==undefined&&!/\b(?:const|let|var|function|class)\s+input\b/.test(src);await new AF("__t","__x","__f","console","setTimeout","setInterval","clearTimeout","clearInterval",...(hi?["input"]:[]),instrument(src))(T,()=>{stack.pop()},vs=>mgrab(vs),con,sT,sI,cl,cl,...(hi?[inp]:[]))}
   catch(e){err=e&&e.loc?"Line "+e.loc.line+": "+e.message.replace(/\s*\(\d+:\d+\)$/,""):String(e&&e.message||e);
     if(/==>/.test(src))err+="\nHint: an arrow function is written with => (not ==>).";
     else if(/=<|=>=/.test(src))err+="\nHint: check your comparison / arrow operators.";}
   const dl=Date.now()+4000;while(act.size&&Date.now()<dl)await new Promise(r=>setTimeout(r,25));
   act.forEach(cl);
-  return{ev,out,err,cut};
+  return{ev,out,err,cut,mats};
 }
 
 const chips=v=>v.map(([k,x])=>`<span class="c"><b>${esc(k)}</b>=${esc(x)}</span>`).join("");
@@ -218,7 +225,7 @@ let rtab="tbl",pt,rid=0,el=0,lim=0,go=false,ti;
 /* ---------- timer ---------- */
 const fmt=s=>String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
 function tdraw(){const left=lim?lim-el:el;const t=$("#tm");t.textContent=(left<0?"-":"")+fmt(Math.abs(left));t.classList.toggle("late",!!lim&&el>lim);$("#tp").textContent=go?"Pause":"Start"}
-function tset(on){go=on;clearInterval(ti);if(on)ti=setInterval(()=>{el++;tdraw()},1000);tdraw()}
+function tset(on){go=on;clearInterval(ti);if(on){const st=Date.now()-el*1000;ti=setInterval(()=>{el=Math.floor((Date.now()-st)/1000);tdraw()},250)}tdraw()}
 
 /* ---------- middle panel ---------- */
 function guide(){
@@ -283,17 +290,20 @@ function mmap(){
 }
 function right(){
   const r=last;if(!r)return;clearInterval(pt);
+  $("#mxi").hidden=rtab!=="mat";
+  $("#mxo").innerHTML=esc(r.out.join("\n")||"(nothing printed)")+(r.err?`<div class="err">${esc(r.err)}</div>`:"");
   const m={};r.ev.forEach(e=>{const k=nm(e)+" · line "+e.line;m[k]=(m[k]||0)+1});
   const md=r.ev.length?Math.max(...r.ev.map(e=>e.d))+1:0;
   $("#st").innerHTML=r.ev.length?`<span>Max nesting: <b>${md}</b></span> `+Object.entries(m).map(([k,v])=>`<span class="c">${esc(k)} ran <b>${v}×</b></span>`).join(""):"";
   $("#pc").style.display=rtab==="tbl"&&r.ev.length?"flex":"none";
-  if(!r.ev.length){$("#rv").innerHTML=empty("No loop or function found in this code. Write a loop and every iteration will appear here as a row, with variables as columns.");return}
+  if(!r.ev.length&&!(rtab==="mat"&&r.mats&&Object.keys(r.mats.after).length)){$("#rv").innerHTML=empty("No loop or function found in this code. Write a loop and every iteration will appear here as a row, with variables as columns.");return}
   rtab==="tbl"?tbl():rtab==="mat"?mat():mmap();
   if(r.cut)$("#rv").insertAdjacentHTML("beforeend",empty("Recording stopped after 3000 steps."));
 }
 
 /* ---------- list, pick, events ---------- */
-async function run(){const id=++rid;const r=await exec(ed.value);if(id!==rid)return;last=r;view();right()}
+const getIn=()=>{const s=($("#mxin").value||"").trim();if(!s)return undefined;try{return JSON.parse(s)}catch(e){return s}};
+async function run(){const id=++rid;const r=await exec(ed.value,getIn());if(id!==rid)return;last=r;view();right()}
 function sched(){clearTimeout(timer);timer=setTimeout(run,350)}
 function side(){
   const f=$("#q").value.toLowerCase();let h="",c="";
@@ -318,6 +328,7 @@ $("#q").addEventListener("input",side);
 ed.addEventListener("input",()=>{LS.set("ll:q"+cur,ed.value);sched()});
 ed.addEventListener("keydown",e=>{if(e.key==="Tab"){e.preventDefault();const s=ed.selectionStart;ed.setRangeText("  ",s,ed.selectionEnd,"end");ed.dispatchEvent(new Event("input"))}});
 $("#run").onclick=run;
+$("#mxin").value=LS.get("ll:mxin")||"";$("#mxin").addEventListener("input",()=>{LS.set("ll:mxin",$("#mxin").value);sched()});
 $("#dn").onclick=()=>{if(done[cur]){delete done[cur];tset(true)}else{done[cur]=Math.max(el,1);tset(false)}LS.set("ll:done",JSON.stringify(done));dnBtn();side()};
 $("#tp").onclick=()=>tset(!go);
 $("#tr").onclick=()=>{el=0;tset(true)};
@@ -489,7 +500,7 @@ document.head.insertAdjacentHTML("beforeend",`<style>
 @media(max-width:900px){.xg{grid-template-columns:1fr}.xs{position:static;max-height:240px}#pgx{padding:8px 12px 24px}}
 </style>`);
 let mxt,it,rn=1,rt=0,rs=Date.now(),rsh=false,iq=null,i0=0;
-const J=(k,d)=>{try{return JSON.parse(LS.get(k)||d)}catch(e){return JSON.parse(d)}};
+const J=(k,d)=>{const w=JSON.parse(d);try{const v=JSON.parse(LS.get(k)||d);return v&&typeof v==="object"&&Array.isArray(v)===Array.isArray(w)?v:w}catch(e){return w}};
 let rwD=J("ll:rwd","{}"),my=J("ll:my","{}"),iv=J("ll:iv","[]");
 const LV=["Basic Array & Object","Array ke andar Object","Array mein Update / Delete","Nested Object Update","Nested Array Update","Object ke andar Array","Nested Array + Object","Real-Time Applications","Advanced Operations","Interview-Level Challenges"];
 const DOM=["Product","Stock","Healthcare","Dating","Movie Streaming"];
@@ -526,7 +537,7 @@ const saveMy=(k,t,c)=>{my[k]={t,c,n:(my[k]&&my[k].n)||"",ts:Date.now()};LS.set("
 $("#pgn").insertAdjacentHTML("beforeend",'<button data-p="4">Real-World (100)</button><button data-p="5">2D Loops</button><button data-p="6">My Logic</button><button data-p="7">Interview</button>');
 $("#pg2").insertAdjacentHTML("afterend",'<div id="pgx" hidden></div>');
 const X=$("#pgx"),_sp=showPg;
-showPg=function(p){clearInterval(mxt);clearInterval(it);
+showPg=function(p){if(typeof mxStop==="function")mxStop();clearInterval(it);
   if(p<4){X.hidden=true;_sp(p);return}
   pg=p;$("#pg1").hidden=true;$("#pg2").hidden=true;X.hidden=false;
   document.querySelectorAll("#pgn button").forEach(b=>b.classList.toggle("on",+b.dataset.p===p));
@@ -672,6 +683,836 @@ X.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
   if(b.dataset.a==="ic"){if(b.dataset.arm){iv=[];LS.set("ll:iv","[]");ivR()}else{b.dataset.arm="1";b.textContent="Click again to confirm";setTimeout(()=>{b.dataset.arm="";b.textContent="Clear history"},3000)}}
   else if(b.dataset.a==="ie"&&iq){$("#ive").value="// "+iq.t+"\n\n";$("#ivo").textContent=""}});
 if(!window.acorn)document.querySelector(".top").insertAdjacentHTML("beforeend",'<p class="err">The code analyzer failed to load (check your internet connection). Run and the loop tables need it.</p>');
+</script>
+<script>
+/* ===== DSA Theory content (Roman Hindi + English) ===== */
+const TOP=[
+/* ---------------- DATA STRUCTURES ---------------- */
+{id:"array",g:"ds",t:"Array",
+hi:["Array ek ordered list hai jisme items memory me ek ke baad ek rakhe hote hain. Har item ka ek index hota hai (0 se start), isliye arr[i] se kisi bhi item tak seedha O(1) me pahunch jaate hain.","Beech me insert ya delete karna mehnga hai kyunki baaki items ko aage-peeche shift karna padta hai (O(n)). End me push aur pop sasta hai (O(1))."],
+en:["An array is an ordered list whose items sit next to each other in memory. Each item has an index (starting at 0), so arr[i] reaches any item directly in O(1).","Inserting or deleting in the middle is expensive because the other items must shift (O(n)). push and pop at the end are cheap (O(1))."],
+an:["Cinema hall ki seats: seat number pata ho to seedha wahan pahunch jaate ho. Beech me nayi seat banani ho to sabko khisakna padega.","Cinema seats: if you know the seat number you walk straight to it. Adding a new seat in the middle means everyone has to move."],
+dg:"index:   0   1   2   3\n       +---+---+---+---+\narr    | 5 | 8 | 2 | 9 |\n       +---+---+---+---+\n         ^ arr[0]      ^ arr[arr.length - 1]",
+cx:[["Access arr[i]","O(1)"],["Search (unsorted)","O(n)"],["push / pop (end)","O(1)"],["unshift / shift (start)","O(n)"],["insert / delete (middle)","O(n)"]],
+us:["Jab index se fast access chahiye, ya ordered data par loop chalana ho.","When you need fast access by index or you mainly loop over ordered data."],
+tp:["Off-by-one error sabse common galti hai: last index arr.length - 1 hota hai, arr.length nahi.","Off-by-one is the classic bug: the last index is arr.length - 1, not arr.length."],
+ex:[{t:"Access, push, splice, max",c:`const arr = [5, 8, 2, 9];
+console.log(arr[2]);        // 2  (O(1) access)
+arr.push(7);                // add at end, O(1)
+arr.splice(1, 1);           // remove index 1, shifts others, O(n)
+console.log(arr);           // [5, 2, 9, 7]
+let max = arr[0];
+for (let i = 1; i < arr.length; i++) {
+  if (arr[i] > max) max = arr[i];
+}
+console.log("max:", max);   // max: 9`}]},
+
+{id:"matrix",g:"ds",t:"2D Array (Matrix)",tab:"mat",
+hi:["Matrix ek array ke andar arrays hota hai: m[row][col]. Rows = m.length, columns = m[0].length. Isko nested loops se traverse karte hain: bahar wala loop row, andar wala loop column.","Memory me matrix flat line me store hota hai. Row-major me address = i * cols + j hota hai, column-major me j * rows + i. Row by row chalna cache ke liye achha hai kyunki agle address par hi jaate ho."],
+en:["A matrix is an array of arrays: m[row][col]. Rows = m.length, columns = m[0].length. You walk it with nested loops: the outer loop picks the row, the inner loop picks the column.","In memory a matrix is stored as one flat line. Row-major means address = i * cols + j, column-major means j * rows + i. Walking row by row is cache-friendly because you move to the next address each time."],
+an:["Excel sheet: har cell ka row aur column hota hai. Row-by-row padhna aasaan hai, column-by-column me upar-neeche kood-kood ke jaana padta hai.","A spreadsheet: every cell has a row and a column. Reading row by row is smooth, reading column by column makes you jump around."],
+dg:"        col 0  col 1  col 2\n      +------+------+------+\nrow 0 |  1   |  2   |  3   |\nrow 1 |  4   |  5   |  6   |\nrow 2 |  7   |  8   |  9   |\n      +------+------+------+\nflat (row-major): 1 2 3 4 5 6 7 8 9   address = i*3 + j",
+cx:[["Access m[i][j]","O(1)"],["Traverse all cells","O(rows x cols)"],["Transpose / rotate","O(n^2)"],["Extra space (in place)","O(1)"]],
+us:["Grid problems: images, boards, maps, spreadsheets, dynamic programming tables.","Grid problems: images, game boards, maps, spreadsheets, dynamic programming tables."],
+tp:["Rotate 90 clockwise = transpose phir har row reverse. Matrix tab me before/after diff dekh sakte ho.","Rotate 90 clockwise = transpose then reverse each row. The Matrix tab shows a before/after diff for it."],
+ex:[{t:"Rotate matrix 90 clockwise (open the Matrix tab)",tab:"mat",c:`const M = [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9]
+];
+const n = M.length;
+// step 1: transpose
+for (let i = 0; i < n; i++) {
+  for (let j = i + 1; j < n; j++) {
+    [M[i][j], M[j][i]] = [M[j][i], M[i][j]];
+  }
+}
+// step 2: reverse every row
+for (let i = 0; i < n; i++) M[i].reverse();
+console.log(M.map(r => r.join(" ")).join(" | "));   // 7 4 1 | 8 5 2 | 9 6 3`}]},
+
+{id:"string",g:"ds",t:"String",
+hi:["String characters ki sequence hai aur JS me immutable hoti hai: s[0] = 'x' likhne se kuch nahi badalta, har change me nayi string banti hai. Isliye loop me baar baar += karna bade input par slow ho sakta hai.","Strings par kaam ke 3 common tareeke: two pointers (palindrome), frequency map (anagram, first unique char) aur sliding window (longest substring)."],
+en:["A string is a sequence of characters and it is immutable in JS: s[0] = 'x' changes nothing, every change creates a new string. Repeated += in a loop on huge input can therefore be slow.","Three common ways to attack string problems: two pointers (palindrome), a frequency map (anagram, first unique character) and a sliding window (longest substring)."],
+an:["String ek chhapi hui line jaisi hai: ek akshar badalna ho to poori line dobara chhapni padti hai.","A string is like a printed line: to change one letter you must print the whole line again."],
+dg:"s = \"hello\"\n index: 0 1 2 3 4\n        h e l l o\n        ^i        ^j   (two pointers move inward)",
+cx:[["s[i] / s.length","O(1)"],["Concatenate / slice / reverse","O(n)"],["includes / indexOf","O(n)"],["Frequency count","O(n)"]],
+us:["Text processing, validation, parsing, search, compression.","Text processing, validation, parsing, search, compression."],
+tp:["Pehle pucho: case-sensitive? spaces? unicode? Edge cases: empty string, ek character.","Ask first: case-sensitive? spaces? unicode? Edge cases: empty string, single character."],
+ex:[{t:"Palindrome (two pointers) and frequency map",c:`const s = "level";
+let i = 0, j = s.length - 1, ok = true;
+while (i < j) {
+  if (s[i] !== s[j]) { ok = false; break; }
+  i++; j--;
+}
+console.log(s, "palindrome?", ok);       // true
+const freq = {};
+for (const ch of "banana") freq[ch] = (freq[ch] || 0) + 1;
+console.log(freq);                        // { b: 1, a: 3, n: 2 }`}]},
+
+{id:"linkedlist",g:"ds",t:"Linked List",
+hi:["Linked list me har item (node) ke paas apni value hoti hai aur agle node ka reference (next). Nodes memory me alag-alag jagah ho sakte hain, bas next se jude hote hain.","Fayda: head par insert/delete O(1) hai, shift nahi karna padta. Nuksaan: i-th item tak jaane ke liye head se chalna padta hai, O(n); random access nahi milta."],
+en:["In a linked list every item (node) holds its value and a reference to the next node (next). Nodes can live anywhere in memory; they are only connected through next.","Upside: insert or delete at the head is O(1) with no shifting. Downside: reaching the i-th item means walking from the head, O(n); there is no random access."],
+an:["Treasure hunt: har parchi par agli parchi ka pata likha hota hai. Beech me nayi parchi jodna aasaan hai, par 10vi parchi tak jaane ke liye pehli 9 se guzarna padega.","A treasure hunt: each clue tells you where the next clue is. Adding a clue is easy, but to reach clue 10 you must follow the first 9."],
+dg:"head\n  |\n  v\n[0 | *]--->[1 | *]--->[2 | *]--->[3 | null]\n val next",
+cx:[["Insert / delete at head","O(1)"],["Insert at tail (no tail pointer)","O(n)"],["Search / access i-th","O(n)"],["Reverse","O(n) time, O(1) space"]],
+us:["Jab bar-bar start me insert/delete ho aur random access ki zarurat na ho (stack, queue, undo history).","When you insert or delete at the start often and do not need random access (stacks, queues, undo history)."],
+tp:["Reverse linked list interview ka favourite hai: prev, cur, next teen pointers. Null check na bhoolna.","Reverse a linked list is an interview favourite: three pointers prev, cur, next. Do not forget null checks."],
+ex:[{t:"Build, print and reverse",c:`class Node { constructor(v) { this.val = v; this.next = null; } }
+class LinkedList {
+  constructor() { this.head = null; }
+  addFirst(v) { const n = new Node(v); n.next = this.head; this.head = n; }
+  addLast(v) {
+    const n = new Node(v);
+    if (!this.head) { this.head = n; return; }
+    let c = this.head;
+    while (c.next) c = c.next;
+    c.next = n;
+  }
+  toArray() {
+    const out = []; let c = this.head;
+    while (c) { out.push(c.val); c = c.next; }
+    return out;
+  }
+  reverse() {
+    let prev = null, cur = this.head;
+    while (cur) { const nx = cur.next; cur.next = prev; prev = cur; cur = nx; }
+    this.head = prev;
+  }
+}
+const l = new LinkedList();
+l.addLast(1); l.addLast(2); l.addLast(3); l.addFirst(0);
+console.log(l.toArray());   // [0, 1, 2, 3]
+l.reverse();
+console.log(l.toArray());   // [3, 2, 1, 0]`}]},
+
+{id:"stack",g:"ds",t:"Stack (LIFO)",
+hi:["Stack me jo item sabse last me aaya, wahi sabse pehle bahar jaata hai (LIFO: Last In First Out). Sirf top par kaam hota hai: push (daalo), pop (nikalo), peek (dekho).","JS me array hi stack hai: push() aur pop(), dono O(1). Undo, browser back, function call stack aur bracket matching me use hota hai."],
+en:["In a stack the item that went in last comes out first (LIFO: Last In First Out). You only work at the top: push (add), pop (remove), peek (look).","In JS an array already works as a stack with push() and pop(), both O(1). It powers undo, browser back, the call stack and bracket matching."],
+an:["Plates ka dher: nayi plate upar rakhte ho aur upar se hi uthate ho.","A pile of plates: you add on top and take from the top."],
+dg:"        push -> | 30 | <- pop\n                | 20 |\n                | 10 |\n                +----+\n         top = last item",
+cx:[["push","O(1)"],["pop","O(1)"],["peek (top)","O(1)"],["search","O(n)"]],
+us:["Matching brackets, undo/redo, DFS iterative, expression evaluation, next greater element.","Matching brackets, undo/redo, iterative DFS, expression evaluation, next greater element."],
+tp:["Jab 'sabse recent' ya 'nested' structure dikhe (brackets, parentheses), stack socho.","When you see 'most recent' or 'nested' structure (brackets, parentheses), think stack."],
+ex:[{t:"Valid parentheses",c:`function isValid(s) {
+  const stack = [];
+  const pair = { ")": "(", "]": "[", "}": "{" };
+  for (const ch of s) {
+    if (ch === "(" || ch === "[" || ch === "{") stack.push(ch);
+    else if (stack.pop() !== pair[ch]) return false;
+  }
+  return stack.length === 0;
+}
+console.log(isValid("{[()]}"), isValid("(]"), isValid("(("));   // true false false`}]},
+
+{id:"queue",g:"ds",t:"Queue (FIFO)",
+hi:["Queue me jo pehle aaya wahi pehle jaata hai (FIFO: First In First Out). Back se enqueue (daalo), front se dequeue (nikalo).","Array ka shift() O(n) hota hai kyunki sab items khisakte hain. Bade data ke liye head pointer wali queue use karo taaki dequeue O(1) rahe. BFS, task scheduling, printer jobs me use hota hai."],
+en:["In a queue the first item in is the first out (FIFO: First In First Out). You enqueue at the back and dequeue at the front.","Array shift() is O(n) because every item moves. For big data use a queue with a head pointer so dequeue stays O(1). It powers BFS, task scheduling and print jobs."],
+an:["Ticket counter ki line: jo pehle aaya wo pehle jaata hai.","A ticket counter line: whoever arrived first is served first."],
+dg:"front                      back\n  |                          |\n  v                          v\n dequeue <- [ A ][ B ][ C ] <- enqueue",
+cx:[["enqueue","O(1)"],["dequeue (head pointer)","O(1)"],["dequeue with array.shift()","O(n)"],["peek front","O(1)"]],
+us:["BFS, level-order traversal, scheduling, rate limiting, buffers.","BFS, level-order traversal, scheduling, rate limiting, buffers."],
+tp:["Interview me poochte hain: 'Queue ko do stacks se banao'. Concept: ek stack input, doosra output.","A classic: 'build a queue from two stacks'. One stack takes input, the other serves output."],
+ex:[{t:"O(1) queue with a head pointer",c:`class Queue {
+  constructor() { this.items = {}; this.head = 0; this.tail = 0; }
+  enqueue(v) { this.items[this.tail++] = v; }
+  dequeue() {
+    if (this.head === this.tail) return undefined;
+    const v = this.items[this.head];
+    delete this.items[this.head++];
+    return v;
+  }
+  get size() { return this.tail - this.head; }
+}
+const q = new Queue();
+q.enqueue("A"); q.enqueue("B"); q.enqueue("C");
+console.log(q.dequeue(), q.dequeue(), q.size);   // A B 1`}]},
+
+{id:"hash",g:"ds",t:"Hash Map and Set",
+hi:["Hash map key se value tak average O(1) me pahunchata hai. Key ko ek number (hash) me badal kar seedha uski jagah dekhta hai, isliye poori list scan nahi karni padti. Set me sirf unique values hoti hain.","Interview me sabse zyada kaam aata hai: count karna, duplicate pakadna, 'pehle dekha tha?' check karna aur O(n^2) ko O(n) banana."],
+en:["A hash map reaches a value from its key in O(1) on average. It turns the key into a number (hash) and jumps straight to that slot, so it never scans the whole list. A Set stores unique values only.","It is the most useful interview tool: counting, finding duplicates, 'have I seen this before?' checks, and turning O(n^2) into O(n)."],
+an:["Dictionary ya phone contacts: naam (key) likho to number (value) turant mil jaata hai, poori book nahi padhni padti.","A dictionary or phone contacts: type the name (key) and the number (value) appears at once, no need to read the whole book."],
+dg:"key 'apple' --hash--> slot 3 --> 'red'\nkey 'sky'   --hash--> slot 7 --> 'blue'\n\nMap: { apple: red, sky: blue }\nSet: { 1, 2, 3 }  (no duplicates)",
+cx:[["get / set / has / delete","O(1) average"],["Worst case (many collisions)","O(n)"],["Iterate all","O(n)"],["Space","O(n)"]],
+us:["Frequency count, two sum, grouping, caching (memoization), detecting duplicates.","Frequency count, two sum, grouping, caching (memoization), detecting duplicates."],
+tp:["Object ya Map? Key object ya number ho to Map lo, insertion order milta hai aur size O(1).","Object or Map? Use Map for non-string keys, you also get insertion order and O(1) size."],
+ex:[{t:"Two Sum in O(n) and Set basics",c:`const nums = [2, 7, 11, 15], target = 9;
+const seen = new Map();
+for (let i = 0; i < nums.length; i++) {
+  const need = target - nums[i];
+  if (seen.has(need)) { console.log([seen.get(need), i]); break; }   // [0, 1]
+  seen.set(nums[i], i);
+}
+const set = new Set([1, 2, 2, 3]);
+console.log(set.size, set.has(2));   // 3 true`}]},
+
+{id:"tree",g:"ds",t:"Binary Tree and BST",
+hi:["Tree me ek root hota hai aur har node ke 0 se 2 bachche (left, right). Binary Search Tree (BST) me rule hota hai: left me chhote, right me bade. Isliye search, insert, delete balanced hone par O(log n) hote hain.","Inorder traversal (left, root, right) BST ko sorted order me deta hai. Tree ke zyadatar problems recursion se solve hote hain."],
+en:["A tree has one root and every node has up to two children (left, right). A Binary Search Tree (BST) keeps smaller values on the left and larger on the right, so search, insert and delete are O(log n) when it is balanced.","Inorder traversal (left, root, right) returns a BST in sorted order. Most tree problems are solved with recursion."],
+an:["Family tree ya company hierarchy: upar boss, neeche team. BST ek aisa dictionary index hai jisme har step par aadha hissa chhod dete ho.","A family tree or company hierarchy: boss on top, team below. A BST works like an index where every step discards half of the options."],
+dg:"        8\n       / \\\n      3   10\n     / \\    \\\n    1   6    14\n\ninorder: 1 3 6 8 10 14 (sorted)",
+cx:[["Search / insert / delete (balanced)","O(log n)"],["Worst case (skewed)","O(n)"],["Traversal (any order)","O(n)"],["Height of tree","O(h) recursion stack"]],
+us:["Sorted data with frequent insert/delete, hierarchy, file systems, DOM, autocomplete.","Sorted data with frequent insert/delete, hierarchy, file systems, the DOM, autocomplete."],
+tp:["Har tree problem me base case pehle likho: node === null. Phir left aur right par recursion.","In every tree problem write the base case first: node === null. Then recurse on left and right."],
+ex:[{t:"Insert, inorder and height",c:`class TreeNode { constructor(v) { this.val = v; this.left = null; this.right = null; } }
+function insert(root, v) {
+  if (!root) return new TreeNode(v);
+  if (v < root.val) root.left = insert(root.left, v);
+  else root.right = insert(root.right, v);
+  return root;
+}
+function inorder(n, out = []) {
+  if (!n) return out;
+  inorder(n.left, out);
+  out.push(n.val);
+  inorder(n.right, out);
+  return out;
+}
+function height(n) { return n ? 1 + Math.max(height(n.left), height(n.right)) : 0; }
+let root = null;
+for (const v of [8, 3, 10, 1, 6, 14]) root = insert(root, v);
+console.log(inorder(root));   // [1, 3, 6, 8, 10, 14]
+console.log(height(root));    // 3`}]},
+
+{id:"heap",g:"ds",t:"Heap (Priority Queue)",
+hi:["Heap ek tree-jaisa structure hai jo array me store hota hai. Min-heap me sabse chhota item hamesha top (index 0) par hota hai. Parent hamesha apne bachchon se chhota hota hai.","Index formula: parent = (i - 1) >> 1, left = 2i + 1, right = 2i + 2. push me item end me daal kar upar bubble karte hain, pop me last item ko top par rakh kar neeche sink karte hain. Dono O(log n)."],
+en:["A heap is a tree-shaped structure stored in an array. In a min-heap the smallest item is always on top (index 0), and every parent is smaller than its children.","Index formulas: parent = (i - 1) >> 1, left = 2i + 1, right = 2i + 2. push adds at the end and bubbles up, pop moves the last item to the top and sinks it down. Both are O(log n)."],
+an:["Hospital emergency room: sabse serious patient pehle dekha jaata hai, aane ke order se nahi.","A hospital emergency room: the most urgent patient is seen first, not the first to arrive."],
+dg:"min-heap:        1\n               /   \\\n              3     8\n             / \\\n            5   9\n\narray: [1, 3, 8, 5, 9]",
+cx:[["peek min","O(1)"],["push","O(log n)"],["pop","O(log n)"],["Build heap from n items","O(n)"]],
+us:["Top K elements, scheduling, Dijkstra, merge K sorted lists, running median.","Top K elements, scheduling, Dijkstra, merging K sorted lists, running median."],
+tp:["'K largest' ke liye size K ka min-heap rakho: O(n log k), poora sort karne se behtar.","For 'K largest' keep a min-heap of size K: O(n log k), better than sorting everything."],
+ex:[{t:"Min-heap from scratch",c:`class MinHeap {
+  constructor() { this.a = []; }
+  push(v) {
+    const a = this.a;
+    a.push(v);
+    let i = a.length - 1;
+    while (i > 0) {
+      const p = (i - 1) >> 1;
+      if (a[p] <= a[i]) break;
+      [a[p], a[i]] = [a[i], a[p]];
+      i = p;
+    }
+  }
+  pop() {
+    const a = this.a;
+    if (!a.length) return undefined;
+    const top = a[0], last = a.pop();
+    if (a.length) {
+      a[0] = last;
+      let i = 0;
+      while (true) {
+        const l = 2 * i + 1, r = l + 1;
+        let m = i;
+        if (l < a.length && a[l] < a[m]) m = l;
+        if (r < a.length && a[r] < a[m]) m = r;
+        if (m === i) break;
+        [a[m], a[i]] = [a[i], a[m]];
+        i = m;
+      }
+    }
+    return top;
+  }
+}
+const h = new MinHeap();
+[5, 3, 8, 1, 9].forEach(x => h.push(x));
+console.log(h.pop(), h.pop(), h.pop());   // 1 3 5`}]},
+
+{id:"graph",g:"ds",t:"Graph",
+hi:["Graph me nodes (vertices) aur unko jodne wali lines (edges) hoti hain. Edges directed (ek taraf) ya undirected (dono taraf) ho sakti hain, aur weight bhi ho sakta hai. Social network, maps, dependencies sab graph hain.","Sabse common representation adjacency list hai: har node ke saath uske padosiyon ki list. Space O(V + E). Adjacency matrix O(V^2) leta hai par edge check O(1) me hota hai."],
+en:["A graph has nodes (vertices) joined by lines (edges). Edges can be directed (one way) or undirected (both ways) and may carry a weight. Social networks, maps and dependencies are all graphs.","The most common representation is an adjacency list: each node stores a list of its neighbours. Space is O(V + E). An adjacency matrix takes O(V^2) but checks an edge in O(1)."],
+an:["Metro map: stations nodes hain aur rail lines edges. Ek station se doosre tak ka raasta dhoondhna graph problem hai.","A metro map: stations are nodes and rail lines are edges. Finding a route between two stations is a graph problem."],
+dg:"A --- B\n|     |\nC --- D --- E\n\nA: [B, C]\nB: [A, D]\nC: [A, D]\nD: [B, C, E]\nE: [D]",
+cx:[["Add edge (list)","O(1)"],["List neighbours","O(deg)"],["BFS / DFS","O(V + E)"],["Space (adjacency list)","O(V + E)"]],
+us:["Networks, routes, dependency order, connected components, shortest path.","Networks, routes, dependency order, connected components, shortest path."],
+tp:["Visited set zaroor rakho, warna cycle me infinite loop ho jaata hai.","Always keep a visited set, otherwise a cycle sends you into an infinite loop."],
+ex:[{t:"Build an adjacency list",c:`const edges = [["A", "B"], ["A", "C"], ["B", "D"], ["C", "D"], ["D", "E"]];
+const g = {};
+for (const [u, v] of edges) {
+  (g[u] ??= []).push(v);
+  (g[v] ??= []).push(u);      // undirected: add both ways
+}
+console.log(g);
+console.log("neighbours of D:", g["D"]);   // ["B", "C", "E"]`}]},
+
+{id:"trie",g:"ds",t:"Trie (Prefix Tree)",
+hi:["Trie ek tree hai jisme har edge ek character hota hai aur root se kisi node tak ka raasta ek prefix batata hai. Words ke common prefix ek hi raaste me share hote hain.","Search ya startsWith ka time word ki length par depend karta hai, words ki ginti par nahi: O(L). Autocomplete aur spell-check me use hota hai."],
+en:["A trie is a tree where each edge is one character and the path from the root to a node spells a prefix. Words with a common prefix share the same path.","search and startsWith take time proportional to the word length, not the number of words: O(L). It powers autocomplete and spell-check."],
+an:["Phone keyboard ka suggestion: 'ca' likhte hi car, card, care dikh jaate hain kyunki teeno ka raasta 'c-a' tak same hai.","Keyboard suggestions: type 'ca' and car, card, care appear because all three share the path 'c-a'."],
+dg:"root\n  |\n  c\n  |\n  a\n  |\n  r (end: car)\n / \\\nd   e\n(card)(care)",
+cx:[["insert word","O(L)"],["search word","O(L)"],["startsWith prefix","O(L)"],["Space","O(total characters)"]],
+us:["Autocomplete, prefix search, dictionary, word games, IP routing.","Autocomplete, prefix search, dictionary, word games, IP routing."],
+tp:["End-of-word flag zaroor rakho: 'car' aur 'ca' me farak yahi batata hai.","Keep an end-of-word flag: that is what separates 'car' from 'ca'."],
+ex:[{t:"Insert, search, startsWith",c:`class Trie {
+  constructor() { this.root = {}; }
+  insert(w) {
+    let n = this.root;
+    for (const ch of w) n = n[ch] ??= {};
+    n.end = true;
+  }
+  walk(s) {
+    let n = this.root;
+    for (const ch of s) { if (!n[ch]) return null; n = n[ch]; }
+    return n;
+  }
+  search(w) { const n = this.walk(w); return !!n && n.end === true; }
+  startsWith(p) { return this.walk(p) !== null; }
+}
+const t = new Trie();
+["car", "card", "care"].forEach(w => t.insert(w));
+console.log(t.search("car"), t.search("ca"), t.startsWith("ca"));   // true false true`}]},
+
+/* ---------------- ALGORITHMS ---------------- */
+{id:"bigo",g:"al",t:"Big-O (Time and Space)",
+hi:["Big-O batata hai ki input n bada hone par algorithm ka time ya memory kaise badhta hai. Ye exact seconds nahi, growth ka pattern hai. Constants aur chhote terms hata dete hain: 3n + 10 sirf O(n) hai.","Order (chhote se bade): O(1) < O(log n) < O(n) < O(n log n) < O(n^2) < O(2^n) < O(n!). Interview me hamesha time aur space dono bolo, aur worst case batao."],
+en:["Big-O describes how time or memory grows as the input n grows. It is a growth pattern, not exact seconds. Constants and small terms are dropped: 3n + 10 is just O(n).","Order from fast to slow: O(1) < O(log n) < O(n) < O(n log n) < O(n^2) < O(2^n) < O(n!). In interviews always state both time and space, and the worst case."],
+an:["Sheher me 10 se 1000 log aa jaayen: lift (O(1)) ka time same, line me ginti (O(n)) badhti hai, har jode ko milwana (O(n^2)) tezi se phat jaata hai.","If a crowd grows from 10 to 1000: an elevator ride stays the same (O(1)), counting people grows with the crowd (O(n)), introducing every pair explodes (O(n^2))."],
+dg:"time\n ^                      O(n^2)\n |                    /\n |                 /     O(n log n)\n |             /   .-'''\n |          / .-'      O(n)\n |      _.-'  ____---------\n |__.-'''----------------- O(log n), O(1)\n +--------------------------------> n",
+cx:[["array index, Map get","O(1)"],["binary search","O(log n)"],["single loop","O(n)"],["merge sort","O(n log n)"],["two nested loops","O(n^2)"],["all subsets","O(2^n)"],["all permutations","O(n!)"]],
+us:["Har solution ko compare karne ke liye: brute force vs optimized.","To compare any two solutions: brute force vs optimized."],
+tp:["Loop ke andar loop = multiply, ek ke baad ek loop = add. Recursion me depth bhi space hai.","A loop inside a loop multiplies, loops one after another add. Recursion depth also counts as space."],
+ex:[{t:"Count operations as n grows (see the loop table)",c:`function linear(n) { let c = 0; for (let i = 0; i < n; i++) c++; return c; }
+function quadratic(n) {
+  let c = 0;
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) c++;
+  return c;
+}
+function logarithmic(n) { let c = 0; while (n > 1) { n = Math.floor(n / 2); c++; } return c; }
+for (const n of [8, 16, 32]) {
+  console.log("n=" + n, "log n:", logarithmic(n), "n:", linear(n), "n^2:", quadratic(n));
+}
+// n=8 -> 3, 8, 64   n=32 -> 5, 32, 1024`}]},
+
+{id:"search",g:"al",t:"Searching: Linear and Binary",
+hi:["Linear search har item ko ek-ek karke check karta hai: O(n), kisi bhi array par chalta hai. Binary search sirf sorted array par chalta hai aur har step me aadha hissa hata deta hai: O(log n).","Binary search me lo, hi, mid rakhte hain. Mid check karo: chhota ho to right me jao (lo = mid + 1), bada ho to left me (hi = mid - 1). 1 million items me sirf ~20 steps."],
+en:["Linear search checks every item one by one: O(n), works on any array. Binary search works only on a sorted array and throws away half of the range every step: O(log n).","Keep lo, hi and mid. Check mid: if it is too small go right (lo = mid + 1), if too big go left (hi = mid - 1). One million items take only about 20 steps."],
+an:["Dictionary me shabd dhoondhna: beech se kholte ho, shabd aage hai ya peeche dekhte ho, aur aadhi book chhod dete ho.","Finding a word in a dictionary: open in the middle, decide whether it is before or after, and drop half of the book."],
+dg:"[1, 3, 5, 7, 9, 11]  target = 7\n lo=0        hi=5   mid=2 -> 5 < 7  go right\n       lo=3  hi=5   mid=4 -> 9 > 7  go left\n       lo=3  hi=3   mid=3 -> 7 found at index 3",
+cx:[["Linear search","O(n)"],["Binary search","O(log n)"],["Binary search space","O(1) iterative"],["Needs sorted input","binary only"]],
+us:["Sorted data, 'first/last position', 'search in rotated array', 'minimum value that works' (binary search on answer).","Sorted data, 'first/last position', 'search in rotated array', 'smallest value that works' (binary search on the answer)."],
+tp:["mid = Math.floor((lo + hi) / 2). Loop condition lo <= hi. Ye 2 line galat to infinite loop ya miss.","mid = Math.floor((lo + hi) / 2) and loop while lo <= hi. Get these two lines wrong and you get an infinite loop or a miss."],
+ex:[{t:"Binary search",c:`function binarySearch(a, target) {
+  let lo = 0, hi = a.length - 1;
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    if (a[mid] === target) return mid;
+    if (a[mid] < target) lo = mid + 1;
+    else hi = mid - 1;
+  }
+  return -1;
+}
+console.log(binarySearch([1, 3, 5, 7, 9, 11], 7));   // 3
+console.log(binarySearch([1, 3, 5, 7, 9, 11], 4));   // -1`}]},
+
+{id:"sort",g:"al",t:"Sorting: Bubble, Merge, Quick",
+hi:["Sorting items ko order me lagana hai. Bubble sort padosi items ko swap karta hai: aasaan par O(n^2). Merge sort array ko aadha-aadha todta hai, sort karta hai aur jodta hai: hamesha O(n log n) par extra memory leta hai. Quick sort pivot choose karke chhote-bade me baantta hai: average O(n log n).","Practical me JS ka arr.sort((a, b) => a - b) use karo. Comparator na do to numbers string ki tarah sort hote hain ([10, 9, 1] -> [1, 10, 9])."],
+en:["Sorting puts items in order. Bubble sort swaps neighbours: simple but O(n^2). Merge sort splits the array in halves, sorts them and merges: always O(n log n) but needs extra memory. Quick sort picks a pivot and splits into smaller and larger: O(n log n) on average.","In real code use JS arr.sort((a, b) => a - b). Without a comparator numbers sort as strings ([10, 9, 1] becomes [1, 10, 9])."],
+an:["Taash ke patte lagana: bubble = padosi patte badalna, merge = do sorted dher milana, quick = ek patta chuno aur chhote-bade alag karo.","Sorting cards: bubble = swap neighbours, merge = combine two sorted piles, quick = pick a card and split into smaller and larger."],
+dg:"merge sort:\n[5 2 9 1]\n[5 2] [9 1]        split\n[5] [2] [9] [1]    split\n[2 5]  [1 9]       merge\n[1 2 5 9]          merge",
+cx:[["Bubble sort","O(n^2), best O(n)"],["Merge sort","O(n log n), space O(n)"],["Quick sort","avg O(n log n), worst O(n^2)"],["Array.sort (V8)","O(n log n), stable"]],
+us:["Pehle sort karne se baaki kaam (binary search, two pointers, intervals) aasaan ho jaata hai.","Sorting first often makes the rest easy (binary search, two pointers, intervals)."],
+tp:["Stable sort ka matlab barabar items ka relative order nahi badalta. Multi-key sorting me ye zaroori hai.","A stable sort keeps equal items in their original order. It matters for multi-key sorting."],
+ex:[{t:"Bubble sort (watch the nested loop table)",c:`const a = [5, 2, 9, 1];
+for (let i = 0; i < a.length - 1; i++) {
+  let swapped = false;
+  for (let j = 0; j < a.length - 1 - i; j++) {
+    if (a[j] > a[j + 1]) { [a[j], a[j + 1]] = [a[j + 1], a[j]]; swapped = true; }
+  }
+  if (!swapped) break;          // already sorted: stop early
+}
+console.log(a);                  // [1, 2, 5, 9]`},
+{t:"Merge sort and quick sort",c:`function mergeSort(a) {
+  if (a.length < 2) return a;
+  const mid = a.length >> 1;
+  const left = mergeSort(a.slice(0, mid)), right = mergeSort(a.slice(mid));
+  const out = [];
+  let i = 0, j = 0;
+  while (i < left.length && j < right.length) out.push(left[i] <= right[j] ? left[i++] : right[j++]);
+  return out.concat(left.slice(i), right.slice(j));
+}
+function quickSort(a) {
+  if (a.length < 2) return a;
+  const p = a[a.length - 1], l = [], r = [];
+  for (let i = 0; i < a.length - 1; i++) (a[i] < p ? l : r).push(a[i]);
+  return [...quickSort(l), p, ...quickSort(r)];
+}
+console.log(mergeSort([5, 2, 9, 1, 7]));   // [1, 2, 5, 7, 9]
+console.log(quickSort([5, 2, 9, 1, 7]));   // [1, 2, 5, 7, 9]`}]},
+
+{id:"recursion",g:"al",t:"Recursion",
+hi:["Recursion me function apne aap ko chhote problem par call karta hai. Do cheezein zaroori: base case (kab rukna hai) aur recursive case (problem ko chhota karke dobara call). Base case bhool gaye to stack overflow.","Har call call stack par ek frame leta hai, isliye depth n ho to space O(n). Repeat hone wale subproblems ho to memoization lagao (DP)."],
+en:["In recursion a function calls itself on a smaller version of the problem. Two things are required: a base case (when to stop) and a recursive case (shrink the problem and call again). Forget the base case and you get a stack overflow.","Every call takes a frame on the call stack, so depth n means O(n) space. If subproblems repeat, add memoization (DP)."],
+an:["Russian dolls: guddi kholo, andar chhoti guddi, tab tak jab tak sabse chhoti (base case) na mil jaaye.","Russian dolls: open one, find a smaller one inside, until you reach the smallest (base case)."],
+dg:"factorial(4)\n= 4 * factorial(3)\n= 4 * 3 * factorial(2)\n= 4 * 3 * 2 * factorial(1)   <- base case = 1\n= 24",
+cx:[["factorial(n)","O(n) time, O(n) stack"],["fast power","O(log n)"],["naive fibonacci","O(2^n)"],["fibonacci + memo","O(n)"]],
+us:["Trees, backtracking, divide and conquer, problems jinki definition khud pe nirbhar hai.","Trees, backtracking, divide and conquer, and problems defined in terms of smaller versions of themselves."],
+tp:["Pehle base case likho, phir ek chhota example haath se trace karo.","Write the base case first, then trace one small example by hand."],
+ex:[{t:"Factorial and fast power",c:`function factorial(n) {
+  if (n <= 1) return 1;              // base case
+  return n * factorial(n - 1);       // recursive case
+}
+console.log(factorial(5));           // 120
+function power(b, e) {
+  if (e === 0) return 1;
+  const half = power(b, e >> 1);     // solve half the problem
+  return e % 2 ? half * half * b : half * half;
+}
+console.log(power(2, 10));           // 1024`}]},
+
+{id:"twoptr",g:"al",t:"Two Pointers",
+hi:["Two pointers me do index (l aur r) rakhte hain jo array par chalte hain, usually dono sire se andar ki taraf ya ek hi disha me alag speed se. Isse O(n^2) wala nested loop O(n) ban jaata hai.","Sorted array me sum dhoondhna ho: sum chhota to l++, bada to r--. Duplicates hatane me slow pointer likhta hai, fast pointer padhta hai."],
+en:["Two pointers keeps two indexes (l and r) walking over the array, usually from both ends inward or in the same direction at different speeds. It turns an O(n^2) nested loop into O(n).","For a pair sum in a sorted array: if the sum is too small do l++, if too big do r--. For removing duplicates the slow pointer writes while the fast pointer reads."],
+an:["Do log rassi ke dono sire se beech ki taraf chalte hain aur beech me milte hain.","Two people walk from both ends of a rope towards the middle."],
+dg:"[1, 2, 4, 7, 11, 15]  target = 15\n  l                 r    1+15=16 > 15 -> r--\n  l             r        1+11=12 < 15 -> l++\n     l          r        2+11=13 < 15 -> l++\n        l       r        4+11=15 found",
+cx:[["Pair sum in sorted array","O(n)"],["Remove duplicates in place","O(n), O(1) space"],["Sorting needed first?","often +O(n log n)"]],
+us:["Sorted array, palindrome, pair/triplet sum, merging, in-place filtering.","Sorted arrays, palindromes, pair/triplet sums, merging, in-place filtering."],
+tp:["Array sorted hai ya sort kar sakte ho? To pehle two pointers socho.","Sorted, or can be sorted? Think two pointers first."],
+ex:[{t:"Pair sum in a sorted array",c:`function twoSumSorted(a, target) {
+  let l = 0, r = a.length - 1;
+  while (l < r) {
+    const s = a[l] + a[r];
+    if (s === target) return [l, r];
+    if (s < target) l++;
+    else r--;
+  }
+  return null;
+}
+console.log(twoSumSorted([1, 2, 4, 7, 11, 15], 15));   // [2, 4]`},
+{t:"Remove duplicates in place",c:`const a = [1, 1, 2, 2, 3];
+let k = 1;                              // slow pointer = write position
+for (let i = 1; i < a.length; i++) {    // fast pointer = read position
+  if (a[i] !== a[i - 1]) a[k++] = a[i];
+}
+console.log(a.slice(0, k));             // [1, 2, 3]`}]},
+
+{id:"window",g:"al",t:"Sliding Window",
+hi:["Sliding window me ek range [l, r] rakhte hain jo array par aage khisakti hai. Naya item add karte ho, purana nikalte ho, poora sum dobara nahi nikalte. Isse O(n * k) ka kaam O(n) me hota hai.","Do type: fixed size window (max sum of K items) aur variable window (longest substring without repeats): r badhao, window galat ho jaaye to l badhao."],
+en:["A sliding window keeps a range [l, r] that moves across the array. You add the new item and remove the old one instead of recomputing the whole sum, turning O(n * k) work into O(n).","Two kinds: fixed-size window (max sum of K items) and variable window (longest substring without repeats): grow r, and when the window becomes invalid move l."],
+an:["Train ki khidki se bahar dekhna: nayi cheez aati hai, purani nikal jaati hai, aap poora scene dobara nahi dekhte.","Looking out of a train window: new scenery enters, old scenery leaves, you do not re-watch the whole scene."],
+dg:"[2, 1, 5, 1, 3, 2]  k = 3\n[2  1  5] = 8\n   [1  5  1] = 7   (+1 -2)\n      [5  1  3] = 9   (+3 -1)  <- best\n         [1  3  2] = 6",
+cx:[["Fixed window sum","O(n)"],["Variable window","O(n) (each pointer moves once)"],["Space","O(1) or O(alphabet) with map"]],
+us:["Subarray/substring problems with 'contiguous', 'at most K', 'longest', 'shortest'.","Subarray/substring problems with 'contiguous', 'at most K', 'longest', 'shortest'."],
+tp:["'Contiguous' shabd dikha to sliding window ya prefix sum socho.","The word 'contiguous' should make you think sliding window or prefix sum."],
+ex:[{t:"Max sum of K items (fixed window)",c:`function maxSumK(a, k) {
+  let sum = 0;
+  for (let i = 0; i < k; i++) sum += a[i];
+  let best = sum;
+  for (let i = k; i < a.length; i++) {
+    sum += a[i] - a[i - k];          // slide: add new item, remove old item
+    best = Math.max(best, sum);
+  }
+  return best;
+}
+console.log(maxSumK([2, 1, 5, 1, 3, 2], 3));   // 9`},
+{t:"Longest substring without repeats (variable window)",c:`function longest(s) {
+  const last = new Map();
+  let l = 0, best = 0;
+  for (let r = 0; r < s.length; r++) {
+    if (last.has(s[r]) && last.get(s[r]) >= l) l = last.get(s[r]) + 1;
+    last.set(s[r], r);
+    best = Math.max(best, r - l + 1);
+  }
+  return best;
+}
+console.log(longest("abcabcbb"));   // 3  ("abc")`}]},
+
+{id:"prefix",g:"al",t:"Prefix Sum",
+hi:["Prefix sum me pehle ek baar running total array banate hain: pre[i] = pehle i items ka sum. Uske baad kisi bhi range [l, r] ka sum O(1) me milta hai: pre[r + 1] - pre[l].","Hash map ke saath milakar 'sum K wale subarrays kitne hain' jaise problems O(n) me solve hote hain."],
+en:["Build a running-total array once: pre[i] = sum of the first i items. After that the sum of any range [l, r] is O(1): pre[r + 1] - pre[l].","Combined with a hash map it solves 'how many subarrays sum to K' in O(n)."],
+an:["Passbook ka running balance: kisi bhi do dates ke beech kharcha = aakhri balance minus pehla balance.","A bank passbook running balance: spending between two dates = last balance minus first balance."],
+dg:"a   = [3, 1, 4, 1, 5, 9]\npre = [0, 3, 4, 8, 9, 14, 23]\nsum(1..3) = pre[4] - pre[1] = 9 - 3 = 6   (1+4+1)",
+cx:[["Build prefix array","O(n)"],["Range sum query","O(1)"],["Subarray sum = K (with Map)","O(n)"]],
+us:["Bahut saari range-sum queries, subarray sum, equilibrium index, 2D prefix sum for matrix.","Many range-sum queries, subarray sums, equilibrium index, 2D prefix sums for matrices."],
+tp:["pre ka size n + 1 rakho aur pre[0] = 0, isse l = 0 ka case clean ho jaata hai.","Use size n + 1 with pre[0] = 0 so the l = 0 case needs no special handling."],
+ex:[{t:"Range sum queries",c:`const a = [3, 1, 4, 1, 5, 9];
+const pre = [0];
+for (let i = 0; i < a.length; i++) pre.push(pre[i] + a[i]);
+const rangeSum = (l, r) => pre[r + 1] - pre[l];
+console.log(pre);              // [0, 3, 4, 8, 9, 14, 23]
+console.log(rangeSum(1, 3));   // 6`},
+{t:"Count subarrays with sum K",c:`function countK(a, k) {
+  const seen = new Map([[0, 1]]);
+  let sum = 0, count = 0;
+  for (const x of a) {
+    sum += x;
+    count += seen.get(sum - k) || 0;      // earlier prefix that makes sum K
+    seen.set(sum, (seen.get(sum) || 0) + 1);
+  }
+  return count;
+}
+console.log(countK([1, 1, 1], 2));   // 2`}]},
+
+{id:"bfsdfs",g:"al",t:"BFS and DFS",
+hi:["BFS (Breadth First Search) level by level chalta hai aur queue use karta hai: pehle sabhi padosi, phir unke padosi. Unweighted graph me sabse chhota raasta BFS se milta hai.","DFS (Depth First Search) ek raaste par jitna gehra ja sako jaata hai, phir wapas aata hai. Recursion ya stack use hota hai. Dono O(V + E). Visited set zaroori hai."],
+en:["BFS (Breadth First Search) goes level by level using a queue: all neighbours first, then their neighbours. In an unweighted graph BFS finds the shortest path.","DFS (Depth First Search) goes as deep as possible along one path, then backtracks. It uses recursion or a stack. Both are O(V + E). A visited set is essential."],
+an:["BFS: paani me patthar phenko, lehren paas se door tak faillti hain. DFS: bhool-bhulaiya me ek raasta end tak chalo, band mile to wapas.","BFS: drop a stone in water, ripples spread ring by ring. DFS: in a maze follow one path to its end, and turn back at a dead end."],
+dg:"    A\n   / \\\n  B   C\n  |  / \\\n  D-+   E\n   \\   /\n     F\n\nBFS: A B C D E F\nDFS: A B D F C E",
+cx:[["BFS time","O(V + E)"],["DFS time","O(V + E)"],["BFS space (queue)","O(V)"],["DFS space (stack)","O(V)"]],
+us:["BFS: shortest path, levels, minimum steps. DFS: connected components, cycle detection, paths, backtracking.","BFS: shortest path, levels, minimum steps. DFS: connected components, cycle detection, paths, backtracking."],
+tp:["'Minimum steps' = BFS. 'Saare raaste / exist karta hai?' = DFS.","'Minimum steps' = BFS. 'All paths / does one exist?' = DFS."],
+ex:[{t:"BFS and DFS on a graph",c:`const g = { A: ["B", "C"], B: ["D"], C: ["D", "E"], D: ["F"], E: ["F"], F: [] };
+function bfs(start) {
+  const seen = new Set([start]), q = [start], order = [];
+  while (q.length) {
+    const u = q.shift();
+    order.push(u);
+    for (const v of g[u]) {
+      if (!seen.has(v)) { seen.add(v); q.push(v); }
+    }
+  }
+  return order;
+}
+function dfs(u, seen = new Set(), order = []) {
+  seen.add(u);
+  order.push(u);
+  for (const v of g[u]) if (!seen.has(v)) dfs(v, seen, order);
+  return order;
+}
+console.log("BFS:", bfs("A").join(" "));   // A B C D E F
+console.log("DFS:", dfs("A").join(" "));   // A B D F C E`}]},
+
+{id:"dp",g:"al",t:"Dynamic Programming",
+hi:["DP tab kaam aata hai jab problem ke chhote subproblems baar-baar repeat hote hain. Har subproblem ka answer ek baar nikaal kar store kar lo (memoization top-down ya table bottom-up), dobara calculate mat karo.","Steps: 1) state define karo (dp[i] ka matlab kya hai), 2) transition likho (dp[i] kaise dp[i-1] se banta hai), 3) base case, 4) answer kahan hai. Isse exponential O(2^n) polynomial ban jaata hai."],
+en:["DP helps when the small subproblems of a problem repeat again and again. Compute each subproblem once and store the answer (memoization top-down or a table bottom-up) instead of recomputing it.","Steps: 1) define the state (what dp[i] means), 2) write the transition (how dp[i] comes from earlier values), 3) base case, 4) where the answer lives. It turns exponential O(2^n) into polynomial time."],
+an:["Pehle likhe hue notes: pichhle sawal ka answer yaad hai to dobara solve nahi karte.","Notes from earlier: if you remember the answer to a previous question you do not solve it again."],
+dg:"fib(5)\n  fib(4)            fib(3) repeats!\n   fib(3)  fib(2)   -> store it once\n    fib(2) fib(1)\n\ndp: [0, 1, 1, 2, 3, 5]",
+cx:[["Naive fibonacci","O(2^n)"],["Fibonacci with memo","O(n) time, O(n) space"],["Coin change (amount A, C coins)","O(A x C)"],["Space optimisation","often O(1) rolling variables"]],
+us:["'Minimum / maximum / count ways', knapsack, LIS, grid paths, edit distance.","'Minimum / maximum / count the ways', knapsack, LIS, grid paths, edit distance."],
+tp:["Pehle brute force recursion likho, repeat dikhe to memo lagao, phir table me badlo.","Write brute-force recursion first, add memo when you see repeats, then convert to a table."],
+ex:[{t:"Memoized fibonacci and coin change",c:`function fibMemo(n, memo = {}) {
+  if (n < 2) return n;
+  if (memo[n]) return memo[n];
+  return memo[n] = fibMemo(n - 1, memo) + fibMemo(n - 2, memo);
+}
+console.log(fibMemo(30));   // 832040
+
+function coinChange(coins, amount) {
+  const dp = Array(amount + 1).fill(Infinity);
+  dp[0] = 0;                                  // 0 coins make amount 0
+  for (let a = 1; a <= amount; a++) {
+    for (const c of coins) {
+      if (a - c >= 0) dp[a] = Math.min(dp[a], dp[a - c] + 1);
+    }
+  }
+  return dp[amount] === Infinity ? -1 : dp[amount];
+}
+console.log(coinChange([1, 2, 5], 11));   // 3  (5 + 5 + 1)`}]},
+
+{id:"greedy",g:"al",t:"Greedy",
+hi:["Greedy me har step par wahi choice lete hain jo us waqt sabse achhi lagti hai, aur piche mudkar nahi dekhte. Ye tabhi sahi hai jab local best choice se global best answer milta ho (proof ya exchange argument chahiye).","Common pattern: pehle sort karo (end time, ratio, size), phir ek pass me choose karo. Greedy fast hota hai, par har problem par sahi nahi hota: coin change [1, 3, 4] amount 6 par greedy fail hota hai."],
+en:["Greedy takes the choice that looks best at each step and never looks back. It is correct only when local best choices lead to the global best answer (you need a proof or an exchange argument).","Common pattern: sort first (by end time, ratio, size), then pick in one pass. Greedy is fast but not always right: for coins [1, 3, 4] and amount 6 greedy fails."],
+an:["Chhutte paise dete waqt sabse bada note pehle dena: aksar sahi, par kabhi-kabhi nahi.","Giving change: hand over the biggest note first. Usually right, sometimes not."],
+dg:"activities (start,end): [1,3] [2,5] [4,7] [6,8] [8,9]\nsort by end time, pick if start >= last end:\n  [1,3] pick | [2,5] skip | [4,7] pick | [6,8] skip | [8,9] pick\n  -> 3 activities",
+cx:[["Activity selection","O(n log n) (sort)"],["Coin change (canonical coins)","O(C)"],["Needs proof","yes"]],
+us:["Intervals, scheduling, Huffman coding, minimum platforms, jump game.","Intervals, scheduling, Huffman coding, minimum platforms, jump game."],
+tp:["Greedy bolne se pehle ek counter-example dhoondho. Na mile to hi confident raho.","Hunt for a counter-example before you commit to greedy. Only be confident if you cannot find one."],
+ex:[{t:"Activity selection",c:`function maxActivities(acts) {
+  acts.sort((a, b) => a[1] - b[1]);      // earliest finish first
+  let end = -Infinity, count = 0;
+  for (const [s, e] of acts) {
+    if (s >= end) { count++; end = e; }
+  }
+  return count;
+}
+console.log(maxActivities([[1, 3], [2, 5], [4, 7], [6, 8], [8, 9]]));   // 3`},
+{t:"When greedy fails (coin change)",c:`function greedyCoins(coins, amount) {
+  coins = [...coins].sort((a, b) => b - a);
+  let n = 0;
+  for (const c of coins) {
+    while (amount >= c) { amount -= c; n++; }
+  }
+  return n;
+}
+console.log(greedyCoins([25, 10, 5, 1], 41));   // 4  (correct)
+console.log(greedyCoins([1, 3, 4], 6));         // 3  (4+1+1) but best is 2 (3+3): greedy fails`}]},
+
+{id:"backtrack",g:"al",t:"Backtracking",
+hi:["Backtracking me saari possibilities ko ek-ek karke try karte hain: choose (ek option chuno), explore (aage badho), un-choose (wapas hato). Agar kisi raaste se answer nahi ban sakta to turant wahi ruk kar wapas aa jaate hain (pruning).","Permutations, subsets, N-Queens, Sudoku, word search jaise problems me use hota hai. Time aksar exponential hota hai, isliye pruning se kaam kam karo."],
+en:["Backtracking tries every possibility one at a time: choose (pick an option), explore (go deeper), un-choose (undo). If a path can no longer lead to an answer you stop and step back at once (pruning).","Used for permutations, subsets, N-Queens, Sudoku and word search. Time is usually exponential, so prune to cut the work."],
+an:["Bhool-bhulaiya: ek mod lo, aage band raasta mile to wapas aakar doosra mod lo.","A maze: take a turn, hit a dead end, come back and try another turn."],
+dg:"permutations of [1,2,3]\n        []\n  [1]    [2]    [3]\n [1,2] [1,3] ...\n[1,2,3] [1,3,2] ...\n choose -> explore -> un-choose",
+cx:[["Permutations","O(n x n!)"],["Subsets","O(n x 2^n)"],["Recursion depth","O(n)"]],
+us:["'Saare combinations / arrangements', constraint puzzles, board problems.","'All combinations / arrangements', constraint puzzles, board problems."],
+tp:["Un-choose step (pop, used[i] = false) bhoolna sabse common bug hai.","Forgetting the un-choose step (pop, used[i] = false) is the most common bug."],
+ex:[{t:"All permutations (check the Matrix tab for the result)",tab:"mat",c:`function permutations(arr) {
+  const res = [], used = Array(arr.length).fill(false), cur = [];
+  function go() {
+    if (cur.length === arr.length) { res.push([...cur]); return; }
+    for (let i = 0; i < arr.length; i++) {
+      if (used[i]) continue;
+      used[i] = true; cur.push(arr[i]);    // choose
+      go();                                // explore
+      cur.pop(); used[i] = false;          // un-choose (backtrack)
+    }
+  }
+  go();
+  return res;
+}
+const out = permutations([1, 2, 3]);
+console.log(out.map(p => p.join("")).join(" "));   // 123 132 213 231 312 321`}]}
+];
+
+/* ===== Batch 5: Pro Matrix + DSA Theory + extras ===== */
+document.head.insertAdjacentHTML("beforeend",`<style>
+#pgn{overflow-x:auto;white-space:nowrap;scrollbar-width:thin}#pgn button{flex:0 0 auto}
+.mxp{font-size:13.5px}
+.mxh{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-bottom:8px}
+.mxh label{display:flex;gap:5px;align-items:center;color:var(--mu);font-size:12.5px}
+.mxh select{padding:4px 6px;border:1px solid var(--ln);border-radius:6px;background:var(--pn);color:var(--ink);font:inherit;font-size:12.5px}
+.mxh input[type=range]{flex:1 1 120px;min-width:90px;accent-color:var(--ac)}
+.mxh button.b{padding:4px 10px;font-size:13px}
+.mxs{background:color-mix(in srgb,var(--ac) 10%,var(--pn));border:1px solid var(--ln);border-left:4px solid var(--ac);border-radius:8px;padding:6px 10px;margin:4px 0 8px;font-size:13px;min-height:34px}
+.gx{display:grid;gap:4px;margin:4px 0 6px;width:max-content;min-width:100%}
+.gh{display:flex;align-items:center;justify-content:center;color:var(--mu);font:600 11.5px var(--mono)}
+.gc{position:relative;display:flex;align-items:center;justify-content:center;min-height:44px;border:1px solid var(--ln);border-radius:8px;background:var(--bg);font:600 14px var(--mono);transition:background .25s,transform .2s,opacity .25s;padding:0 4px;overflow:hidden}
+.gc .o{position:absolute;top:1px;left:4px;font:600 9.5px var(--mono);color:var(--mu);font-style:normal}
+.gc.sm{background:transparent;border-style:dashed;color:var(--mu)}
+.gc.cur{outline:3px solid var(--d3);outline-offset:1px;transform:scale(1.08);z-index:2}
+.gc.dim{opacity:.35}
+.gc.df{box-shadow:inset 0 0 0 2px var(--d3);border-style:dashed}
+.gc.mxx{box-shadow:inset 0 0 0 2px var(--d2)}
+.gc.mnn{box-shadow:inset 0 0 0 2px var(--d1)}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--mu);margin:2px 0 8px}
+.lgd i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px;border:2px solid var(--c,var(--ln))}
+.lgd i.hm{width:70px;border:1px solid var(--ln);background:linear-gradient(90deg,color-mix(in srgb,var(--ac) 6%,var(--pn)),color-mix(in srgb,var(--ac) 58%,var(--pn)))}
+.scs{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px;margin:4px 0 8px}
+.sc{border:1px solid var(--ln);border-radius:8px;padding:5px 9px;background:var(--bg)}.sc small{display:block;font-size:11px}.sc b{font:600 14px var(--mono)}
+.mxm div.cur{outline:2px solid var(--d3)}
+.mxt{font-size:12.5px;color:var(--mu);margin:4px 0}
+.mxe{padding:6px 2px}.mxe code,.lg code{font:12.5px var(--mono);background:var(--bg);padding:0 4px;border-radius:4px}
+#pgx .dsh{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
+.dsl button.on2{background:var(--ac);color:var(--bg);border-color:var(--ac)}
+.dsb{display:block;width:100%;text-align:left;background:none;border:0;border-left:3px solid transparent;color:var(--ink);font:inherit;font-size:13px;padding:4px 6px;cursor:pointer}
+.dsb.on{border-left-color:var(--ac);background:var(--bg);font-weight:700}.dsb.ok{color:var(--d2)}
+.xs h3{margin:10px 4px 2px;font-size:12px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em}
+.lg{border:1px solid var(--ln);border-radius:10px;padding:8px 12px;margin:8px 0;background:var(--pn)}
+.lg p{margin:4px 0}.lg.hi{border-left:4px solid var(--d3)}.lg.en{border-left:4px solid var(--d0)}
+.lt{display:inline-block;font:700 11px var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--mu);margin-bottom:2px}
+.dsc h2{margin:0 0 2px;font-size:22px;letter-spacing:-.01em}.dsc h4{margin:14px 0 2px;font-size:14px}
+.cxt{width:auto;min-width:60%;margin:4px 0 8px}.cxt td:first-child{width:auto;font-family:inherit;color:var(--ink)}.cxt td:last-child{font-family:var(--mono);color:var(--ac)}
+.eo{margin:6px 0 0;padding:8px 10px;background:var(--bg);border:1px dashed var(--ln);border-radius:8px;font:13px/1.5 var(--mono);white-space:pre-wrap;min-height:20px}
+.pill{display:inline-block;font:700 11px var(--mono);padding:1px 8px;border-radius:9px;border:1px solid var(--ln);margin-right:6px;color:var(--ac)}
+</style>`);
+
+/* ---------- engine patch helpers (loaded after exec patch) ---------- */
+const MX={view:"both",when:"after",swap:"auto",mem:"row",heat:true,sums:false,step:-1,sel:"",t:null,ref:null,spd:350,m:null,n:0};
+const isN=x=>typeof x==="number"&&isFinite(x);
+const fvl=x=>x===null||x===undefined?"–":typeof x==="number"?(Number.isInteger(x)?String(x):String(+x.toFixed(3))):esc(String(x).length>7?String(x).slice(0,6)+"…":String(x));
+const MXEX=`// Matrix demo: transpose a 3 x 4 matrix
+const A = [
+  [1, 2, 3, 4],
+  [5, 6, 7, 8],
+  [9, 10, 11, 12]
+];
+const R = A.length, C = A[0].length;
+const T = [];
+for (let j = 0; j < C; j++) {
+  T[j] = [];
+  for (let i = 0; i < R; i++) {
+    T[j][i] = A[i][j];
+  }
+}
+console.log(T.map(r => r.join(" ")).join(" | "));
+`;
+function mxStop(){clearInterval(MX.t);MX.t=null;const p=$("#mxp");if(p)p.textContent="▶ Play"}
+function mxPlay(){
+  mxStop();const n=MX.n||0;if(!n)return;
+  if(MX.step<0||MX.step>=n-1)MX.step=-1;
+  const p=$("#mxp");if(p)p.textContent="⏸ Pause";
+  MX.t=setInterval(()=>{if(MX.step>=n-1){mxStop();return}MX.step++;mxBody()},MX.spd);
+}
+function mxVisits(ev,maxDim){
+  const loops=ev.filter(e=>e.kind==="loop");if(!loops.length)return null;
+  const md=Math.max(...loops.map(e=>e.d)),inner=loops.filter(e=>e.d===md);
+  const get=(e,k)=>{const x=e.vars.find(y=>y[0]===k);return x&&/^\d+$/.test(x[1])?+x[1]:null};
+  const names=[];inner.forEach(e=>e.vars.forEach(([k])=>{if(!names.includes(k)&&get(e,k)!==null)names.push(k)}));
+  const vary=names.filter(k=>{const s=new Set(inner.map(e=>get(e,k)).filter(v=>v!==null));return s.size>1&&Math.max(...s)<maxDim&&s.size<inner.length});
+  const chg=k=>{let c=0,p=null;inner.forEach(e=>{const v=get(e,k);if(v!==null&&v!==p){c++;p=v}});return c};
+  vary.sort((a,b)=>chg(a)-chg(b));
+  const PR=[["i","j"],["r","c"],["row","col"],["row","column"],["y","x"],["m","n"]],pair=PR.find(([a,b])=>vary.includes(a)&&vary.includes(b));
+  let rv,cv;
+  if(pair)[rv,cv]=pair;else if(vary.length>=2)[rv,cv]=vary;else return null;
+  const seq=inner.map(e=>({a:get(e,rv),b:get(e,cv),line:e.line})).filter(x=>x.a!==null&&x.b!==null);
+  return seq.length?{rv,cv,seq}:null;
+}
+function mxModel(){
+  const r=last,mt=r.mats||{before:{},after:{}},af=mt.after||{},bf=mt.before||{};
+  const names=[...new Set([...Object.keys(af),...Object.keys(bf)])].slice(0,8);
+  const maxDim=Math.max(2,...names.map(k=>{const d=af[k]||bf[k];return Math.max(d.length,...d.map(x=>x.length))}));
+  return{names,af,bf,v:mxVisits(r.ev,names.length?maxDim:40)};
+}
+mat=function(){
+  if(MX.ref!==last){MX.ref=last;MX.step=-1;mxStop();MX.sel=""}
+  const m=mxModel();MX.m=m;
+  if(!m.names.length&&!m.v){
+    $("#rv").innerHTML=`<div class="mxe"><p><b>No matrix found yet.</b></p><p class="emp">Declare a 2D array, for example <code>const A = [[1, 2], [3, 4]]</code>, and optionally walk it with nested loops (<code>i</code> for rows, <code>j</code> for columns). You will get values, heatmap, row/column sums, diagonals, before/after diff, a step-by-step replay and the memory layout.</p><button class="b p" data-mx="ex">Load matrix example</button></div>`;return}
+  const sel=MX.sel&&m.names.includes(MX.sel)?MX.sel:(m.names[0]||"");
+  const o=(id,v,a)=>`<select id="${id}">`+a.map(([k,t])=>`<option value="${k}"${String(k)===String(v)?" selected":""}>${t}</option>`).join("")+"</select>";
+  $("#rv").innerHTML=`<div class="mxp">
+<div class="mxh">${m.names.length?m.names.map(k=>`<button class="b${k===sel?" p":""}" data-mx="pick" data-v="${esc(k)}">${esc(k)}</button>`).join(""):'<span class="pill">loop visit map</span>'}<button class="b" data-mx="ex">Load example</button></div>
+<div class="mxh"><label>View ${o("mxv",MX.view,[["both","Value + visit order"],["val","Values only"],["ord","Visit order only"]])}</label><label>Show ${o("mxw",MX.when,[["after","After run"],["before","Before (initial)"]])}</label><label>Memory ${o("mxm",MX.mem,[["row","Row-major"],["col","Column-major"]])}</label><label>Loop vars ${o("mxs",MX.swap,[["auto","Auto"],["no","Normal"],["yes","Swap row/col"]])}</label><label><input type="checkbox" id="mxh"${MX.heat?" checked":""}> Heatmap</label><label><input type="checkbox" id="mxu"${MX.sums?" checked":""}> Sums</label></div>
+<div class="mxh"><button class="b p" id="mxp" data-mx="play">▶ Play</button><button class="b" data-mx="reset">Show all</button><input type="range" id="mxsl" min="0" max="0" value="0" aria-label="Replay step"><label>Speed ${o("mxd",MX.spd,[[700,"Slow"],[350,"Normal"],[120,"Fast"]])}</label></div>
+<div id="mxb"></div></div>`;
+  MX.sel=sel;mxBody();
+};
+function mxBody(){
+  const b=$("#mxb");if(!b){mxStop();return}
+  const m=MX.m,nm=MX.sel&&m.names.includes(MX.sel)?MX.sel:(m.names[0]||"");MX.sel=nm;
+  const seq0=m.v?m.v.seq:[],syn=!nm;let data;
+  if(nm)data=(MX.when==="before"&&m.bf[nm])?m.bf[nm]:(m.af[nm]||m.bf[nm]);
+  else{const R0=Math.min(40,Math.max(...seq0.map(e=>e.a))+1),C0=Math.min(40,Math.max(...seq0.map(e=>e.b))+1);data=Array.from({length:R0},()=>Array(C0).fill(null))}
+  const R=data.length,C=Math.max(1,...data.map(r=>r.length));
+  data=data.map(r=>Array.from({length:C},(_,j)=>r[j]===undefined?null:r[j]));
+  const inr=s=>seq0.every(e=>(s?e.b:e.a)<R&&(s?e.a:e.b)<C);
+  const sw=MX.swap==="yes"?true:MX.swap==="no"?false:(!inr(false)&&inr(true));
+  const S=seq0.map(e=>({r:sw?e.b:e.a,c:sw?e.a:e.b,e})).filter(x=>x.r<R&&x.c<C);
+  MX.n=S.length;if(MX.step>=S.length)MX.step=S.length-1;
+  const st=MX.step,first={},cnt={},rank={};let nr=0;
+  S.forEach((x,i)=>{const k=x.r+","+x.c;cnt[k]=(cnt[k]||0)+1;if(first[k]===undefined){first[k]=i;rank[k]=++nr}});
+  if(syn)data.forEach((row,i)=>row.forEach((_,j)=>{const k=i+","+j;if(rank[k])row[j]=rank[k]}));
+  const sl=$("#mxsl");if(sl){sl.max=Math.max(0,S.length-1);sl.value=Math.max(0,st);sl.disabled=!S.length}
+  const nums=[];data.forEach((row,i)=>row.forEach((x,j)=>{if(isN(x))nums.push({v:x,i,j})}));
+  let mn=null,mxv=null;nums.forEach(n=>{if(!mn||n.v<mn.v)mn=n;if(!mxv||n.v>mxv.v)mxv=n});
+  const span=mn&&mxv?(mxv.v-mn.v)||1:1,view=syn?"ord":MX.view;
+  const bef=m.bf[nm],canDiff=!syn&&MX.when==="after"&&bef&&bef.length===R;
+  const diff=canDiff?(i,j)=>JSON.stringify((bef[i]||[])[j]===undefined?null:bef[i][j])!==JSON.stringify(data[i][j]):()=>false;
+  const ad=(i,j)=>MX.mem==="row"?i*C+j:j*R+i;
+  const showS=MX.sums&&nums.length>0&&!syn;
+  const rs=Array(R).fill(0),cs=Array(C).fill(0);let nd=0;
+  data.forEach((row,i)=>row.forEach((x,j)=>{if(isN(x)){rs[i]+=x;cs[j]+=x}if(diff(i,j))nd++}));
+  let g=`<div class="gx" style="grid-template-columns:30px repeat(${C},minmax(52px,1fr))${showS?" 64px":""}"><div class="gh"></div>`;
+  for(let j=0;j<C;j++)g+=`<div class="gh">${j}</div>`;
+  if(showS)g+=`<div class="gh">Σ</div>`;
+  for(let i=0;i<R;i++){
+    g+=`<div class="gh">${i}</div>`;
+    for(let j=0;j<C;j++){
+      const x=data[i][j],k=i+","+j,f=first[k],seen=f!==undefined&&(st<0||f<=st),cur=st>=0&&S[st]&&S[st].r===i&&S[st].c===j,cls=["gc"];let sty="";
+      if(MX.heat&&isN(x)&&!syn)sty=`background:color-mix(in srgb,var(--ac) ${Math.round(6+(x-mn.v)/span*52)}%,var(--pn))`;
+      if(syn&&seen)sty=`background:color-mix(in srgb,var(--d${(rank[k]-1)%4}) 24%,var(--pn))`;
+      if(cur)cls.push("cur");
+      if(st>=0&&S.length&&!seen)cls.push("dim");
+      if(diff(i,j))cls.push("df");
+      if(!syn&&mxv&&i===mxv.i&&j===mxv.j)cls.push("mxx");
+      else if(!syn&&mn&&i===mn.i&&j===mn.j)cls.push("mnn");
+      const badge=view==="both"&&!syn&&rank[k]&&seen?`<i class="o">#${rank[k]}${cnt[k]>1?"×"+cnt[k]:""}</i>`:"";
+      const txt=view==="ord"?(rank[k]&&seen?rank[k]:"·"):fvl(x);
+      g+=`<div class="${cls.join(" ")}" style="${sty}" title="${esc(nm||"loop")}[${i}][${j}] = ${esc(String(x))} · address ${ad(i,j)}">${badge}${txt}</div>`;
+    }
+    if(showS)g+=`<div class="gc sm">${rs[i]}</div>`;
+  }
+  if(showS){g+=`<div class="gh">Σ</div>`+cs.map(x=>`<div class="gc sm">${x}</div>`).join("")+`<div class="gc sm"><b>${nums.reduce((a,n)=>a+n.v,0)}</b></div>`}
+  g+="</div>";
+  let now;
+  if(S.length){
+    if(st>=0){const x=S[st],e=x.e;now=`Step <b>${st+1}</b>/${S.length} · ${esc(m.v.rv)}=${e.a}, ${esc(m.v.cv)}=${e.b} → ${esc(nm||"cell")}[${x.r}][${x.c}] = <b>${fvl(data[x.r][x.c])}</b> · address ${ad(x.r,x.c)} · line ${e.line}`}
+    else now=`${S.length} loop steps · <b>${nr}</b> distinct cells visited. Press Play or drag the slider to replay.`;
+  }else now=`No nested index loop found for this matrix. Use two loops (for example <code>i</code> and <code>j</code>) to see the visit order and replay.`;
+  const sum=nums.reduce((a,n)=>a+n.v,0),sq=R===C,allNum=nums.length===R*C;
+  const card=(t,v)=>`<div class="sc"><small>${t}</small><b>${v}</b></div>`;
+  let cards=card("Size",R+" × "+C)+card("Elements",R*C);
+  if(nums.length){
+    cards+=card("Sum",+sum.toFixed(3))+card("Average",+(sum/nums.length).toFixed(3))+card("Min",mn.v+" @ ["+mn.i+"]["+mn.j+"]")+card("Max",mxv.v+" @ ["+mxv.i+"]["+mxv.j+"]");
+    if(sq&&allNum){
+      let tr=0,an=0;for(let i=0;i<R;i++){tr+=data[i][i];an+=data[i][R-1-i]}
+      cards+=card("Trace (main diag)",tr)+card("Anti-diagonal",an)+card("Symmetric",data.every((r,i)=>r.every((x,j)=>x===data[j][i]))?"yes":"no")+card("Identity",data.every((r,i)=>r.every((x,j)=>x===(i===j?1:0)))?"yes":"no");
+    }
+  }
+  if(canDiff)cards+=card("Changed cells",nd);
+  let pat="";
+  if(S.length>1){
+    let sq1=0;for(let i=1;i<S.length;i++)if(ad(S[i].r,S[i].c)-ad(S[i-1].r,S[i-1].c)===1)sq1++;
+    const pct=Math.round(sq1/(S.length-1)*100);
+    pat=`<p class="mxt"><b>Access pattern:</b> ${pct}% of steps move to the next memory address (${MX.mem==="row"?"row-major":"column-major"}). ${pct>=80?"Sequential: cache-friendly.":pct<=20?"Strided jumps: poor cache locality. Try swapping the loop order or the memory layout.":"Mixed access."}</p>`;
+  }
+  const tot=R*C,lim=Math.min(tot,96);let mem="";
+  for(let a=0;a<lim;a++){
+    const i=MX.mem==="row"?Math.floor(a/C):a%R,j=MX.mem==="row"?a%C:Math.floor(a/R),k=i+","+j,f=first[k],seen=f!==undefined&&(st<0||f<=st),cur=st>=0&&S[st]&&S[st].r===i&&S[st].c===j;
+    mem+=`<div class="${seen?"f":""}${cur?" cur":""}"><b>addr ${a}</b>[${i}][${j}] ${fvl(data[i][j])}</div>`;
+  }
+  const lg=[];
+  if(MX.heat&&nums.length&&!syn)lg.push('<span><i class="hm"></i>low → high</span>');
+  if(!syn&&mxv)lg.push('<span><i style="--c:var(--d2)"></i>max</span>');
+  if(!syn&&mn&&mn!==mxv)lg.push('<span><i style="--c:var(--d1)"></i>min</span>');
+  if(canDiff&&nd)lg.push('<span><i style="--c:var(--d3)"></i>changed vs before</span>');
+  if(S.length)lg.push('<span><i style="--c:var(--d3)"></i>current step</span>');
+  b.innerHTML=`<div class="mxs">${now}</div><div style="overflow-x:auto;padding:3px">${g}</div><div class="lgd">${lg.join("")}</div><h4>Statistics</h4><div class="scs">${cards}</div>${pat}<h4>Memory <small>(${MX.mem==="row"?"address = i × cols + j":"address = j × rows + i"})</small></h4><div class="mxm">${mem}</div>${tot>lim?empty("Showing the first 96 addresses."):""}`;
+}
+$("#rv").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-mx]");if(!b)return;const a=b.dataset.mx;
+  if(a==="ex"){ed.value=MXEX;LS.set("ll:q"+cur,ed.value);run()}
+  else if(a==="pick"){MX.sel=b.dataset.v;MX.step=-1;mxStop();mat()}
+  else if(a==="play"){MX.t?mxStop():mxPlay()}
+  else if(a==="reset"){mxStop();MX.step=-1;mxBody()}
+});
+$("#rv").addEventListener("change",e=>{
+  const t=e.target,id=t.id;
+  if(id==="mxv")MX.view=t.value;else if(id==="mxw")MX.when=t.value;else if(id==="mxm")MX.mem=t.value;
+  else if(id==="mxs")MX.swap=t.value;else if(id==="mxh")MX.heat=t.checked;else if(id==="mxu")MX.sums=t.checked;
+  else if(id==="mxd"){MX.spd=+t.value;if(MX.t){mxStop();mxPlay()}return}
+  else return;
+  mxBody();
+});
+$("#rv").addEventListener("input",e=>{if(e.target.id==="mxsl"){mxStop();MX.step=+e.target.value;mxBody()}});
+
+/* ---------- DSA theory page ---------- */
+const DSA={id:"array",lang:LS.get("ll:lang")||"both",f:"all",q:"",read:J("ll:dsr","{}")};
+const LANGS=[["hi","Roman Hindi"],["en","English"],["both","Both"]];
+const ps=a=>a.map(x=>`<p>${esc(x)}</p>`).join("");
+const lgb=(hi,en)=>{let h="";if(DSA.lang!=="en")h+=`<div class="lg hi"><span class="lt">Roman Hindi</span>${hi}</div>`;if(DSA.lang!=="hi")h+=`<div class="lg en"><span class="lt">English</span>${en}</div>`;return h};
+function dsaList(){
+  const q=DSA.q.toLowerCase(),vis=TOP.filter(x=>(DSA.f==="all"||x.g===DSA.f)&&(!q||(x.t+" "+x.en.join(" ")).toLowerCase().includes(q)));
+  let h="",g="";
+  vis.forEach(x=>{if(x.g!==g){g=x.g;h+=`<h3>${g==="ds"?"Data Structures":"Algorithms"}</h3>`}h+=`<button class="dsb${x.id===DSA.id?" on":""}${DSA.read[x.id]?" ok":""}" data-d="go" data-id="${x.id}">${esc(x.t)}${DSA.read[x.id]?" ✓":""}</button>`});
+  $("#dsl").innerHTML=h||empty("No topic found.");
+  $("#dsp").textContent=Object.keys(DSA.read).length+" / "+TOP.length+" topics read";
+}
+function dsaTopic(){
+  const x=TOP.find(t=>t.id===DSA.id)||TOP[0],i=TOP.indexOf(x);
+  let h=`<article class="dsc cd" style="margin-top:0"><span class="pill">${x.g==="ds"?"Data Structure":"Algorithm"}</span><h2>${esc(x.t)}</h2>`;
+  h+=`<h4>Theory</h4>`+lgb(ps(x.hi),ps(x.en));
+  h+=`<h4>Real-life analogy</h4>`+lgb(ps([x.an[0]]),ps([x.an[1]]));
+  h+=`<h4>Diagram</h4><pre class="cb">${esc(x.dg)}</pre>`;
+  h+=`<h4>Complexity</h4><table class="cxt"><tr><th>Operation</th><th>Cost</th></tr>${x.cx.map(([a,b])=>`<tr><td>${esc(a)}</td><td>${esc(b)}</td></tr>`).join("")}</table>`;
+  h+=`<h4>When to use</h4>`+lgb(ps([x.us[0]]),ps([x.us[1]]));
+  h+=`<h4>Interview tip</h4>`+lgb(ps([x.tp[0]]),ps([x.tp[1]]));
+  h+=`<h4>Examples</h4>`+x.ex.map((e,k)=>`<div class="lb">${esc(e.t)}</div><pre class="cb">${esc(e.c)}</pre><div class="btns"><button class="b p" data-d="run" data-k="${k}">Run here</button><button class="b" data-d="try" data-k="${k}">Open in editor + loop table</button></div><pre class="eo" id="eo${k}" hidden></pre>`).join("");
+  h+=`<div class="btns" style="margin-top:14px;flex-wrap:wrap"><button class="b" data-d="nav" data-i="${i-1}"${i?"":" disabled"}>← Previous</button><button class="b" data-d="rd">${DSA.read[x.id]?"Read ✓ (undo)":"Mark as read"}</button><button class="b" data-d="nav" data-i="${i+1}"${i<TOP.length-1?"":" disabled"}>Next →</button></div></article>`;
+  $("#dsm").innerHTML=h;
+}
+function dsaR(){
+  const o=LANGS.map(([k,t])=>`<button class="b${DSA.lang===k?" p":""}" data-d="lang" data-v="${k}">${t}</button>`).join("");
+  X.innerHTML=`<div class="rf" style="padding:0;max-width:1200px"><p class="emp">Algorithms and Data Structures: theory in Roman Hindi and English, with analogy, diagram, complexity and runnable examples.</p><div class="dsh">${o}</div><div class="xg"><div class="xs"><input id="dq" placeholder="Search topic…" aria-label="Search topic" value="${esc(DSA.q)}" style="width:100%;padding:7px 9px;border:1px solid var(--ln);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit;margin-bottom:6px"><div class="dsh"><button class="b${DSA.f==="all"?" p":""}" data-d="f" data-v="all">All</button><button class="b${DSA.f==="ds"?" p":""}" data-d="f" data-v="ds">Data Structures</button><button class="b${DSA.f==="al"?" p":""}" data-d="f" data-v="al">Algorithms</button></div><small id="dsp" style="display:block;margin:2px 4px 4px"></small><div id="dsl"></div></div><div id="dsm"></div></div></div>`;
+  dsaList();dsaTopic();
+}
+X.addEventListener("click",async e=>{
+  const b=e.target.closest("button[data-d]");if(!b)return;const a=b.dataset.d,x=TOP.find(t=>t.id===DSA.id);
+  if(a==="go"){DSA.id=b.dataset.id;dsaList();dsaTopic();window.scrollTo({top:0,behavior:"smooth"})}
+  else if(a==="lang"){DSA.lang=b.dataset.v;LS.set("ll:lang",DSA.lang);dsaR()}
+  else if(a==="f"){DSA.f=b.dataset.v;dsaR()}
+  else if(a==="nav"){const t=TOP[+b.dataset.i];if(t){DSA.id=t.id;dsaR();window.scrollTo({top:0})}}
+  else if(a==="rd"){if(DSA.read[x.id])delete DSA.read[x.id];else DSA.read[x.id]=1;LS.set("ll:dsr",JSON.stringify(DSA.read));dsaList();dsaTopic()}
+  else if(a==="run"){const k=+b.dataset.k,box=$("#eo"+k);box.hidden=false;box.textContent="Running…";const r=await exec(x.ex[k].c);box.textContent=(r.out.join("\n")||"(nothing printed)")+(r.err?"\n\nError: "+r.err:"")}
+  else if(a==="try"){const ex=x.ex[+b.dataset.k];tryCode(ex.c);const t=ex.tab||x.tab;if(t){const bt=document.querySelector('#rt button[data-t="'+t+'"]');if(bt)bt.click()}}
+  else if(a==="bk"){try{const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith("ll:"))o[k]=localStorage.getItem(k)}const u=URL.createObjectURL(new Blob([JSON.stringify(o)],{type:"application/json"})),l=document.createElement("a");l.href=u;l.download="logic-lab-backup.json";l.click();setTimeout(()=>URL.revokeObjectURL(u),1500)}catch(er){alert("Backup failed: "+er.message)}}
+});
+X.addEventListener("input",e=>{if(e.target.id==="dq"){DSA.q=e.target.value;dsaList()}});
+X.addEventListener("change",e=>{
+  if(e.target.id!=="rst"||!e.target.files[0])return;
+  const fr=new FileReader();fr.onload=()=>{try{const o=JSON.parse(fr.result);Object.keys(o).forEach(k=>{if(k.startsWith("ll:"))LS.set(k,o[k])});location.reload()}catch(er){alert("Invalid backup file")}};fr.readAsText(e.target.files[0]);
+});
+$("#pgn").insertAdjacentHTML("beforeend",'<button data-p="8">DSA Theory</button>');
+const _sp2=showPg;
+showPg=function(p){
+  if(p!==8)return _sp2(p);
+  if(typeof mxStop==="function")mxStop();clearInterval(it);pg=8;
+  $("#pg1").hidden=true;$("#pg2").hidden=true;X.hidden=false;
+  document.querySelectorAll("#pgn button").forEach(b=>b.classList.toggle("on",+b.dataset.p===8));
+  dsaR();
+};
+const _myR=myR;
+myR=function(){_myR();const w=X.firstElementChild;if(w)w.insertAdjacentHTML("afterbegin",`<div class="btns" style="margin:6px 0 10px"><button class="b" data-d="bk">Download backup</button><label class="b" style="cursor:pointer">Restore backup<input type="file" id="rst" accept="application/json" hidden></label></div>`)};
+
 </script>
 </body>
 </html>
