@@ -1,1 +1,1 @@
-[{"name":"ADMIN111","h":"1nri4kqdhra.t4n7236up","role":"admin","blocked":false,"limitMin":0,"maxLogins":0}]
+[{"name":"ADMIN111","h":"1nri4kqdhra.t4n7236up","role":"admin","blocked":false,"limitMin":0,"maxLogins":0},{"name":"USER1","h":"14t2bjnzugt.1jxk97rpf9l","role":"user","blocked":false,"limitMin":1000,"maxLogins":2}]
