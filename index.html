@@ -236,6 +236,14 @@ button.b.dg{color:var(--er)}
     </div>
     <div id="amMsg" role="status" aria-live="polite"></div>
 
+    <h3>Share users with other devices</h3>
+    <div class="am-box">
+      <small>Users created here are saved only in this browser. To let them sign in on other devices, export them, paste the block into <code>index.html</code> (replace the <code>auth-users</code> script) and upload the file again. Or import a block on this device.</small>
+      <div class="am-row"><button class="b p" id="exB" type="button">Export users</button><button class="b" id="imB" type="button">Import users</button></div>
+      <textarea id="exT" rows="5" spellcheck="false" placeholder="Exported block appears here. To import, paste a block or a JSON list here and press Import users."></textarea>
+      <div class="am-row" id="exR" hidden><button class="b" id="exC" type="button">Copy</button></div>
+    </div>
+
     <h3>All users</h3>
     <div class="am-tw"><table>
       <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Daily limit (min)</th><th>Max logins</th><th>Used today</th><th>Logins</th><th>Actions</th></tr></thead>
@@ -244,6 +252,7 @@ button.b.dg{color:var(--er)}
   </div>
 </div>
 
+<script type="application/json" id="auth-users">[]</script>
 <script>
 (function(){
 "use strict";
@@ -455,7 +464,32 @@ $("#amCsv").addEventListener("click",function(){
   var u=URL.createObjectURL(new Blob([csv],{type:"text/csv"})),l=document.createElement("a");
   l.href=u;l.download="logic-lab-logins.csv";l.click();setTimeout(function(){URL.revokeObjectURL(u)},1500)});
 
+/* ---- users baked into the file / import-export ---- */
+function mergeIn(list){
+  if(!Array.isArray(list))return 0;
+  var all=users(),n=0;
+  list.forEach(function(x){
+    if(!x||!validName(String(x.name||""))||!x.h)return;
+    var u=all.filter(function(q){return q.name.toLowerCase()===x.name.toLowerCase()})[0];
+    if(!u){u=mk(x.name,x.h,x.role==="admin"?"admin":"user");all.push(u)}
+    u.h=x.h;u.role=x.role==="admin"?"admin":"user";u.blocked=!!x.blocked;
+    u.limitMin=Math.max(0,x.limitMin|0);u.maxLogins=Math.max(0,x.maxLogins|0);n++});
+  if(n)saveU(all);return n}
+function pack(){return JSON.stringify(users().map(function(u){return{name:u.name,h:u.h,role:u.role,blocked:u.blocked,limitMin:u.limitMin,maxLogins:u.maxLogins}}))}
+$("#exB").addEventListener("click",function(){
+  $("#exT").value='<script type="application/json" id="auth-users">'+pack()+'<\/'+'script>';
+  $("#exR").hidden=false;msg("Exported. Copy this block into index.html.")});
+$("#exC").addEventListener("click",function(){
+  var o=$("#exT"),t=o.value;
+  function fb(){o.select();try{document.execCommand("copy");msg("Copied.")}catch(e){msg("Press Ctrl+C to copy.")}}
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){msg("Copied to clipboard.")},fb);else fb()});
+$("#imB").addEventListener("click",function(){
+  var s=$("#exT").value.trim(),m=s.match(/\[[\s\S]*\]/),n=0;
+  try{n=mergeIn(JSON.parse(m?m[0]:s))}catch(e){return msg("Could not read that. Paste an exported block or JSON list.")}
+  msg(n?n+" users imported.":"No valid users found.");amRender()});
+
 /* ---- boot: restore session ---- */
+try{mergeIn(JSON.parse($("#auth-users").textContent))}catch(e){}
 users();
 (function(){
   var s;try{s=JSON.parse(ST.get(K.s))}catch(e){}
