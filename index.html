@@ -236,12 +236,21 @@ button.b.dg{color:var(--er)}
     </div>
     <div id="amMsg" role="status" aria-live="polite"></div>
 
-    <h3>Share users with other devices</h3>
+    <h3>Publish users to the website</h3>
     <div class="am-box">
-      <small>Users created here are saved only in this browser. To let them sign in on other devices, export them, paste the block into <code>index.html</code> (replace the <code>auth-users</code> script) and upload the file again. Or import a block on this device.</small>
-      <div class="am-row"><button class="b p" id="exB" type="button">Export users</button><button class="b" id="imB" type="button">Import users</button></div>
-      <textarea id="exT" rows="5" spellcheck="false" placeholder="Exported block appears here. To import, paste a block or a JSON list here and press Import users."></textarea>
-      <div class="am-row" id="exR" hidden><button class="b" id="exC" type="button">Copy</button></div>
+      <div id="pubSt" class="pill" style="margin-bottom:8px"></div>
+      <div><small>Every change you make here is saved to <code>users.json</code> in your GitHub repo, so users can sign in from any browser or phone. It goes live about a minute after publishing. Time used and login counts are tracked per device.</small></div>
+      <div class="am-g" style="margin-top:10px">
+        <label>GitHub token (stored only in this browser)<input id="ghT" type="password" autocomplete="off" placeholder="github_pat_…" spellcheck="false"></label>
+      </div>
+      <div class="am-row"><button class="b p" id="ghS" type="button">Save token &amp; publish</button><button class="b" id="ghP" type="button">Publish now</button><button class="b dg" id="ghC" type="button">Remove token</button></div>
+      <details style="margin-top:10px"><summary><small>How do I get a token?</small></summary>
+        <small>GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token. Pick only the <b>LogicLab</b> repository, set <b>Contents: Read and write</b>, generate and paste it above.</small></details>
+      <details style="margin-top:10px"><summary><small>Manual option (no token)</small></summary>
+        <small>Export, then create a file called <code>users.json</code> in your repo and paste the text in. Import loads a list on this device.</small>
+        <div class="am-row"><button class="b" id="exB" type="button">Export users</button><button class="b" id="imB" type="button">Import users</button></div>
+        <textarea id="exT" rows="4" spellcheck="false" placeholder="Exported list appears here. To import, paste a list here and press Import users."></textarea>
+        <div class="am-row" id="exR" hidden><button class="b" id="exC" type="button">Copy</button></div></details>
     </div>
 
     <h3>All users</h3>
@@ -256,6 +265,10 @@ button.b.dg{color:var(--er)}
 <script>
 (function(){
 "use strict";
+/* Users are published to users.json in your GitHub repo (see Admin panel > Publish). */
+var REMOTE=/^https?:$/.test(location.protocol);
+var GH={repo:"saqlainshaikhcodes/LogicLab",file:"users.json"};
+(function(){var h=location.hostname,p=location.pathname.split("/")[1];if(/\.github\.io$/.test(h)&&p)GH.repo=h.split(".")[0]+"/"+p})();
 var SEED=[{n:"ADMIN111",h:"1nri4kqdhra.t4n7236up",r:"admin"},{n:"LOGICLAB111",h:"1qbla0mkhfm.1apmxiarp2t",r:"user"}];
 var K={u:"auth:users",s:"auth:session",use:"auth:use"};
 var RM=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -271,13 +284,13 @@ function H(s){var a=0xdeadbeef,b=0x41c6ce57;for(var i=0;i<s.length;i++){var c=s.
  b=Math.imul(b^(b>>>16),2246822507)^Math.imul(a^(a>>>13),3266489909);
  return (4294967296*(2097151&b)+(a>>>0)).toString(36)}
 function hp(n,p){n=n.toLowerCase();return H("a"+n+"|"+p)+"."+H("b"+p+"|"+n)}
-function uid(){return "u"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function kx(n){return String(n).toLowerCase().replace(/\./g,",")}
 var AL="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
 function rp(n){n=n||8;var a=new Uint32Array(n),i;if(window.crypto&&crypto.getRandomValues)crypto.getRandomValues(a);else for(i=0;i<n;i++)a[i]=Math.random()*4e9;var o="";for(i=0;i<n;i++)o+=AL[a[i]%AL.length];return o}
 function today(){var d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()}
 
 /* ---- storage model ---- */
-function mk(n,h,r){return{id:uid(),name:n,h:h,role:r,blocked:false,limitMin:0,maxLogins:0,logins:0,created:Date.now(),last:0}}
+function mk(n,h,r){return{id:kx(n),name:n,h:h,role:r,blocked:false,limitMin:0,maxLogins:0,logins:0,created:Date.now(),last:0}}
 function users(){
   var a;try{a=JSON.parse(ST.get(K.u))}catch(e){}
   if(!Array.isArray(a))a=[];
@@ -287,6 +300,46 @@ function users(){
   if(ch)saveU(a);
   return a}
 function saveU(a){ST.set(K.u,JSON.stringify(a))}
+function ghTok(){return ST.get("auth:gh")||""}
+function dirty(){return ST.get("auth:dirty")==="1"||+ST.get("auth:hold")>Date.now()}
+var cloudOK=null,ver=0,pubT=null,pubBusy=false,pubMsg="",pubKind="";
+function setPub(m,k){if(m!==undefined){pubMsg=m;pubKind=k||""}var e=$("#pubSt");if(!e)return;
+  var txt=pubMsg;if(!txt){txt=!REMOTE?"Local mode: open the live website to publish. Users stay in this browser.":!ghTok()?"Not published yet. Add your GitHub token below.":dirty()?"Changes waiting to be published…":"All changes are published."}
+  e.textContent=txt;e.className="pill "+(pubKind||((!REMOTE||!ghTok()||dirty())?"bad":"good"))}
+function pack(){return JSON.stringify(users().map(function(u){return{name:u.name,h:u.h,role:u.role,blocked:u.blocked,limitMin:u.limitMin,maxLogins:u.maxLogins}}))}
+function commit(a){saveU(a);ver++;ST.set("auth:dirty","1");pubMsg="";pubKind="";setPub();schedulePublish();return Promise.resolve()}
+function schedulePublish(){if(!REMOTE||!ghTok())return;clearTimeout(pubT);pubT=setTimeout(publish,1200)}
+function publish(){
+  if(!REMOTE)return setPub("Open the live website to publish.","bad");
+  if(!ghTok())return setPub("Add your GitHub token first.","bad");
+  if(pubBusy)return schedulePublish();
+  pubBusy=true;setPub("Publishing…","");
+  var v=ver,api="https://api.github.com/repos/"+GH.repo+"/contents/"+GH.file,
+      hd={Authorization:"Bearer "+ghTok(),Accept:"application/vnd.github+json"};
+  fetch(api,{headers:hd,cache:"no-store"}).then(function(r){if(r.status===404)return{};if(!r.ok)throw r.status;return r.json()})
+  .then(function(j){
+    var b={message:"Update users",content:btoa(unescape(encodeURIComponent(pack())))};if(j.sha)b.sha=j.sha;
+    return fetch(api,{method:"PUT",headers:Object.assign({"Content-Type":"application/json"},hd),body:JSON.stringify(b)})})
+  .then(function(r){
+    if(!r.ok)throw r.status;pubBusy=false;
+    ST.set("auth:hold",String(Date.now()+180000));
+    if(v!==ver)return schedulePublish();
+    ST.set("auth:dirty","0");setPub("Published at "+new Date().toLocaleTimeString()+". Live for everyone in about a minute.","good")})
+  .catch(function(e){pubBusy=false;setPub("Publish failed (error "+e+"). Check the token, and that it can write to "+GH.repo+".","bad")})}
+function pull(){
+  if(!REMOTE||dirty())return Promise.resolve(true);
+  return fetch(GH.file+"?t="+Date.now(),{cache:"no-store"}).then(function(r){
+    if(r.status===404)return null;if(!r.ok)throw new Error(r.status);return r.json()})
+  .then(function(cu){
+    cloudOK=true;
+    if(!Array.isArray(cu))return true;
+    var old={};users().forEach(function(u){old[kx(u.name)]=u});
+    var list=cu.filter(function(c){return c&&validName(String(c.name||""))&&c.h}).map(function(c){var o=old[kx(c.name)]||{};
+      return{id:kx(c.name),name:c.name,h:c.h,role:c.role==="admin"?"admin":"user",blocked:!!c.blocked,limitMin:c.limitMin|0,maxLogins:c.maxLogins|0,logins:o.logins|0,created:o.created||0,last:o.last||0}});
+    if(!list.length)return true;
+    saveU(list);users();return true})
+  .catch(function(){cloudOK=false;return false})}
+
 function byName(n){n=String(n).trim().toLowerCase();return users().filter(function(u){return u.name.toLowerCase()===n})[0]}
 function byId(id){return users().filter(function(u){return u.id===id})[0]}
 function useAll(){try{return JSON.parse(ST.get(K.use))||{}}catch(e){return{}}}
@@ -310,8 +363,13 @@ function startSession(u){
   me=u;day=today();sec=used(u.id);ST.set(K.s,JSON.stringify({id:u.id}));
   renderBar();unlock();clearInterval(tk);tk=setInterval(tick,1000);
   setTimeout(function(){if(me){resetCard();U.value=""}},700)}
+var tc=0;
+function syncNow(){
+  if(!REMOTE||!me)return;
+  pull().then(function(){if(!$("#adm").hidden&&!document.activeElement.closest("#amT"))amRender()})}
 function tick(){
   if(!me)return;
+  if(REMOTE&&++tc%15===0)syncNow();
   var f=byId(me.id);
   if(!f)return lock("Your account was removed by the admin.");
   if(f.blocked)return lock("Your account has been blocked by the admin.");
@@ -334,7 +392,8 @@ function attempt(n,p){
   var u=byName(n);
   if(!u||u.h!==hp(u.name,p)){
     fails++;if(fails>=5){fails=0;until=Date.now()+30000;return{err:"Too many wrong attempts. Please wait 30 seconds."}}
-    return{err:"Wrong username or password."}}
+    if(!u)return{err:"No user named “"+n+"” on this device. If the admin just created it, wait a minute and try again."};
+    return{err:"Wrong password for "+u.name+". Check capital letters and spaces."}}
   fails=0;
   if(u.blocked)return{err:"This account is blocked. Please contact the admin."};
   if(u.role!=="admin"){
@@ -348,16 +407,18 @@ function fail(t){
   P.value="";(U.value?P:U).focus()}
 function doLogin(){
   if(busy)return;
-  var n=U.value.trim(),p=P.value;
+  var n=U.value.trim(),p=P.value.trim();
   if(!n||!p)return fail("Enter your username and password.");
   if(Date.now()<until)return fail("Too many wrong attempts. Wait "+Math.ceil((until-Date.now())/1000)+" s.");
   busy=true;B.classList.add("load");B.disabled=true;showErr("");
-  setTimeout(function(){
-    var r=attempt(n,p);busy=false;B.classList.remove("load");B.disabled=false;
+  var wait=new Promise(function(res){setTimeout(res,RM?0:650)});
+  Promise.all([pull(),wait]).then(function(x){
+    busy=false;B.classList.remove("load");B.disabled=false;
+    if(!x[0])return fail("Can’t reach the server. Check your internet and try again.");
+    var r=attempt(n,p);
     if(r.err)return fail(r.err);
     F.classList.add("ok");L.textContent="✓";
-    setTimeout(function(){startSession(r.u)},RM?0:800)
-  },RM?0:650)}
+    setTimeout(function(){startSession(r.u)},RM?0:800)})}
 B.addEventListener("click",doLogin);
 [U,P].forEach(function(i){i.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();doLogin()}})});
 $("#aEye").addEventListener("click",function(){var s=P.type==="password";P.type=s?"text":"password";this.textContent=s?"HIDE":"SHOW";this.setAttribute("aria-label",s?"Hide password":"Show password")});
@@ -401,6 +462,7 @@ function protect(u,all){
   return""}
 function amRender(){
   var all=users();
+  setPub();
   $("#amT").innerHTML=all.map(function(u){
     var adm=u.role==="admin";
     return'<tr data-id="'+u.id+'"><td><b>'+esc(u.name)+"</b>"+(me&&u.id===me.id?" <small>(you)</small>":"")+"</td>"+
@@ -418,22 +480,22 @@ $("#amT").addEventListener("click",function(e){
   if(!u)return;
   if(a==="blk"){
     if(!u.blocked){var p=protect(u,all);if(p)return msg(p)}
-    u.blocked=!u.blocked;saveU(all);msg(u.name+(u.blocked?" is now blocked.":" is unblocked."))}
+    u.blocked=!u.blocked;commit(all);msg(u.name+(u.blocked?" is now blocked.":" is unblocked."))}
   else if(a==="rst"){setUsed(u.id,0);u.logins=0;saveU(all);msg("Usage and login count reset for "+u.name+".")}
   else if(a==="pw"){
     return ask("New password for "+u.name+" (min 6 characters):",rp(8),true,function(np){
       np=np.trim();if(np.length<6)return msg("Password must be at least 6 characters.");
       var al=users(),x=al.filter(function(q){return q.id===id})[0];if(!x)return;
-      x.h=hp(x.name,np);saveU(al);showCred([{u:x.name,p:np}]);msg("Password changed for "+x.name+".");amRender()})}
+      x.h=hp(x.name,np);commit(al);showCred([{u:x.name,p:np}]);msg("Password changed for "+x.name+".");amRender()})}
   else if(a==="del"){
     var p2=protect(u,all);if(p2)return msg(p2);
     return ask("Delete "+u.name+"? This cannot be undone.","",false,function(){
-      saveU(users().filter(function(x){return x.id!==id}));msg(u.name+" deleted.");amRender()})}
+      commit(users().filter(function(x){return x.id!==id}));msg(u.name+" deleted.");amRender()})}
   amRender()});
 $("#amT").addEventListener("change",function(e){
   var f=e.target.dataset.f;if(!f)return;
   var id=e.target.closest("tr").dataset.id,all=users(),u=all.filter(function(x){return x.id===id})[0];if(!u)return;
-  var v=Math.max(0,Math.floor(+e.target.value||0));e.target.value=v;u[f]=v;saveU(all);
+  var v=Math.max(0,Math.floor(+e.target.value||0));e.target.value=v;u[f]=v;commit(all);
   msg((f==="limitMin"?"Daily limit":"Max logins")+" for "+u.name+" set to "+(v||"unlimited")+".")});
 function validName(n){return/^[A-Za-z0-9_.-]{3,24}$/.test(n)}
 $("#cG").addEventListener("click",function(){$("#cP").value=rp(8)});
@@ -444,7 +506,7 @@ $("#cC").addEventListener("click",function(){
   if(byName(n))return msg("That username already exists.");
   var all=users(),u=mk(n,hp(n,p),$("#cR").value);
   u.limitMin=Math.max(0,Math.floor(+$("#cL").value||0));u.maxLogins=Math.max(0,Math.floor(+$("#cM").value||0));
-  all.push(u);saveU(all);showCred([{u:n,p:p}]);msg("Login created for "+n+".");
+  all.push(u);commit(all);showCred([{u:n,p:p}]);msg("Login created for "+n+".");
   $("#cN").value="";$("#cP").value="";amRender()});
 $("#bC").addEventListener("click",function(){
   var pf=$("#bPf").value.replace(/[^A-Za-z0-9_]/g,"").slice(0,12)||"LAB",cnt=Math.min(50,Math.max(1,Math.floor(+$("#bN").value||1)));
@@ -454,7 +516,7 @@ $("#bC").addEventListener("click",function(){
     var name=pf+String(n++).padStart(3,"0");
     if(all.some(function(x){return x.name.toLowerCase()===name.toLowerCase()}))continue;
     var pw=rp(8),u=mk(name,hp(name,pw),"user");u.limitMin=lm;u.maxLogins=ml;all.push(u);out.push({u:name,p:pw})}
-  saveU(all);showCred(out);msg(out.length+" logins created.");amRender()});
+  commit(all);showCred(out);msg(out.length+" logins created.");amRender()});
 $("#amCp").addEventListener("click",function(){
   var t=$("#amOut").value;
   function fb(){var o=$("#amOut");o.select();try{document.execCommand("copy");msg("Copied.")}catch(e){msg("Press Ctrl+C to copy.")}}
@@ -475,10 +537,9 @@ function mergeIn(list){
     u.h=x.h;u.role=x.role==="admin"?"admin":"user";u.blocked=!!x.blocked;
     u.limitMin=Math.max(0,x.limitMin|0);u.maxLogins=Math.max(0,x.maxLogins|0);n++});
   if(n)saveU(all);return n}
-function pack(){return JSON.stringify(users().map(function(u){return{name:u.name,h:u.h,role:u.role,blocked:u.blocked,limitMin:u.limitMin,maxLogins:u.maxLogins}}))}
 $("#exB").addEventListener("click",function(){
-  $("#exT").value='<script type="application/json" id="auth-users">'+pack()+'<\/'+'script>';
-  $("#exR").hidden=false;msg("Exported. Copy this block into index.html.")});
+  $("#exT").value=pack();
+  $("#exR").hidden=false;msg("Copy this into a file named users.json in your repo.")});
 $("#exC").addEventListener("click",function(){
   var o=$("#exT"),t=o.value;
   function fb(){o.select();try{document.execCommand("copy");msg("Copied.")}catch(e){msg("Press Ctrl+C to copy.")}}
@@ -486,16 +547,22 @@ $("#exC").addEventListener("click",function(){
 $("#imB").addEventListener("click",function(){
   var s=$("#exT").value.trim(),m=s.match(/\[[\s\S]*\]/),n=0;
   try{n=mergeIn(JSON.parse(m?m[0]:s))}catch(e){return msg("Could not read that. Paste an exported block or JSON list.")}
-  msg(n?n+" users imported.":"No valid users found.");amRender()});
+  if(n)commit(users());msg(n?n+" users imported.":"No valid users found.");amRender()});
+
+$("#ghS").addEventListener("click",function(){var v=$("#ghT").value.trim();if(!v)return msg("Paste your token first.");ST.set("auth:gh",v);$("#ghT").value="";ST.set("auth:dirty","1");setPub("","");msg("Token saved in this browser.");publish()});
+$("#ghP").addEventListener("click",function(){ST.set("auth:dirty","1");ver++;publish()});
+$("#ghC").addEventListener("click",function(){ST.del("auth:gh");setPub("","");msg("Token removed from this browser.")});
 
 /* ---- boot: restore session ---- */
 try{mergeIn(JSON.parse($("#auth-users").textContent))}catch(e){}
 users();
 (function(){
   var s;try{s=JSON.parse(ST.get(K.s))}catch(e){}
-  var u=s&&byId(s.id);
-  if(u&&!u.blocked&&!limitHit(u,used(u.id)))startSession(u);
-  else{if(s)ST.del(K.s);setTimeout(function(){U.focus()},300)}
+  function go(){
+    var u=s&&byId(s.id);
+    if(u&&!u.blocked&&!limitHit(u,used(u.id)))startSession(u);
+    else{if(s)ST.del(K.s);setTimeout(function(){U.focus()},300)}}
+  if(REMOTE&&s)pull().then(go);else go();
 })();
 })();
 </script>
