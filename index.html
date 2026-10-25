@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="description" content="Logic Lab: JavaScript practice with live loop tables, real-world problems and interview mode.">
+<meta name="theme-color" content="#0B6E99">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Logic Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1992,5 +1993,87 @@ const _myR=myR;
 myR=function(){_myR();const w=X.firstElementChild;if(w)w.insertAdjacentHTML("afterbegin",`<div class="btns" style="margin:6px 0 10px"><button class="b" data-d="bk">Download backup</button><label class="b" style="cursor:pointer">Restore backup<input type="file" id="rst" accept="application/json" hidden></label></div>`)};
 
 </script>
+<style id="hub-css">
+#hub{padding:10px 22px 32px;max-width:1100px;margin:0 auto}
+#hub .hn{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
+#hub .hn button{font:inherit;font-size:14px;padding:6px 14px;border:1px solid var(--ln);background:var(--pn);color:var(--ink);border-radius:20px;cursor:pointer}
+#hub .hn button.on{background:var(--ac);border-color:var(--ac);color:var(--bg);font-weight:700}
+#hub details{background:var(--pn);border:1px solid var(--ln);border-radius:10px;margin:8px 0;padding:0 14px}
+#hub summary{cursor:pointer;padding:12px 0;font-weight:700;list-style-position:inside}
+#hub details[open] summary{border-bottom:1px solid var(--ln);margin-bottom:8px}
+#hub p{margin:6px 0}#hub .hi{color:var(--d1)}#hub .en{color:var(--ink)}#hub b.l{font:700 11px var(--mono);text-transform:uppercase;color:var(--mu);display:block}
+#hub pre{background:var(--bg);border:1px solid var(--ln);border-radius:8px;padding:10px;overflow-x:auto;font:13px/1.5 var(--mono);margin:6px 0 12px}
+#hub .tg{display:grid;gap:10px}#hub .tt{font:20px/1.8 var(--mono);background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:14px;user-select:none}
+#hub .tt .ok{color:var(--d2)}#hub .tt .bad{color:var(--er);background:rgba(180,35,24,.15)}#hub .tt .cur{border-left:2px solid var(--ac)}
+#hub textarea.ti{width:100%;height:90px;padding:10px;border:1px solid var(--ln);border-radius:8px;background:var(--pn);color:var(--ink);font:16px var(--mono)}
+#hub .st{display:flex;gap:10px;flex-wrap:wrap}#hub .st div{flex:1 1 90px;background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:8px;text-align:center}#hub .st b{display:block;font:700 22px var(--mono);color:var(--ac)}
+@media(max-width:820px){#hub{padding:8px 12px 24px}#hub .tt{font-size:17px}}
+</style>
+<script>
+(()=>{"use strict";
+const $=s=>document.querySelector(s),E=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+/* [title, Roman Hindi, English, code] */
+const DB={
+SQL:[
+["1. Install (MySQL)","MySQL installer download karo, 'Server only' choose karo, root password set karo. Phir terminal me login karo.","Install MySQL Community Server, set a root password, then connect with the CLI.","# Ubuntu\nsudo apt install mysql-server\nsudo mysql_secure_installation\nmysql -u root -p"],
+["2. Basics: CREATE, INSERT, SELECT","Table = rows + columns. PRIMARY KEY har row ko unique banati hai. WHERE se filter, ORDER BY se sort.","DDL defines structure, DML manipulates data. Always filter with WHERE before UPDATE or DELETE.","CREATE DATABASE shop; USE shop;\nCREATE TABLE users(id INT PRIMARY KEY AUTO_INCREMENT,\n  name VARCHAR(50) NOT NULL, email VARCHAR(80) UNIQUE, age INT);\nINSERT INTO users(name,email,age) VALUES('Ali','a@x.com',25);\nSELECT * FROM users WHERE age>18 ORDER BY name LIMIT 10;\nUPDATE users SET age=26 WHERE id=1;\nDELETE FROM users WHERE id=1;"],
+["3. JOINs + GROUP BY","JOIN do tables ko common column se jodta hai. GROUP BY ginti/sum nikalne ke liye, HAVING group par filter.","INNER JOIN returns matching rows; LEFT JOIN keeps all left rows. Aggregate with COUNT, SUM, AVG.","SELECT u.name, COUNT(o.id) AS orders, SUM(o.total) AS spent\nFROM users u LEFT JOIN orders o ON o.user_id=u.id\nGROUP BY u.id HAVING SUM(o.total)>1000\nORDER BY spent DESC;"],
+["4. Advanced: Index, Transaction, Window","Index query fast karta hai. Transaction me paisa transfer jaisa kaam ya to poora hota hai ya bilkul nahi (ACID).","Indexes speed reads but slow writes. Transactions guarantee atomicity. Use EXPLAIN to inspect plans.","CREATE INDEX idx_email ON users(email);\nSTART TRANSACTION;\nUPDATE acc SET bal=bal-100 WHERE id=1;\nUPDATE acc SET bal=bal+100 WHERE id=2;\nCOMMIT;  -- or ROLLBACK\nSELECT name, total, RANK() OVER(ORDER BY total DESC) FROM orders;\nEXPLAIN SELECT * FROM users WHERE email='a@x.com';"]],
+PostgreSQL:[
+["1. Install + psql","Postgres install karke 'postgres' user se login karo, naya user aur database banao.","Install PostgreSQL, create a role and database, connect with psql.","sudo apt install postgresql\nsudo -u postgres psql\nCREATE USER app WITH PASSWORD 'strong_pw';\nCREATE DATABASE shop OWNER app;\n\\c shop   -- connect\n\\dt       -- list tables"],
+["2. Postgres-only power","JSONB, ARRAY, RETURNING, UPSERT jaise features Postgres ko special banate hain.","JSONB stores indexed JSON; ON CONFLICT performs upserts; RETURNING gives back changed rows.","CREATE TABLE products(id SERIAL PRIMARY KEY, name TEXT, meta JSONB);\nINSERT INTO products(name,meta) VALUES('Phone','{\"ram\":8}')\nON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name RETURNING *;\nSELECT * FROM products WHERE meta->>'ram'='8';\nCREATE INDEX ON products USING GIN(meta);"],
+["3. CTE, Backup, Production","CTE (WITH) query ko readable banata hai. pg_dump se backup lo. Production me connection pool (pgBouncer) lagao.","Use CTEs for readability, pg_dump for backups, least-privilege roles and pooling in production.","WITH top AS (SELECT user_id,SUM(total) s FROM orders GROUP BY 1)\nSELECT * FROM top WHERE s>5000;\n\n# backup / restore\npg_dump -U app shop > shop.sql\npsql -U app shop < shop.sql"]],
+MongoDB:[
+["1. Install + Shell","MongoDB document database hai: table ki jagah collection, row ki jagah JSON document. Atlas free cloud bhi milta hai.","MongoDB stores flexible JSON-like documents in collections. Install locally or use Atlas.","sudo apt install mongodb-org\nsudo systemctl start mongod\nmongosh\nuse shop"],
+["2. CRUD","insertOne/find/updateOne/deleteOne yaad rakho. $set se sirf field badlo.","CRUD maps to insert, find, update, delete. Use operators like $gt, $in, $set.","db.users.insertOne({name:'Ali',age:25,tags:['js']})\ndb.users.find({age:{$gt:18}},{name:1}).sort({age:-1}).limit(5)\ndb.users.updateOne({name:'Ali'},{$set:{age:26}})\ndb.users.deleteOne({name:'Ali'})"],
+["3. Aggregation + Index","Aggregation pipeline stages me data transform karti hai (SQL ke GROUP BY jaisa).","Pipelines chain $match, $group, $sort, $lookup. Index frequent query fields.","db.orders.aggregate([\n {$match:{status:'paid'}},\n {$group:{_id:'$userId',total:{$sum:'$amount'}}},\n {$sort:{total:-1}}, {$limit:5}])\ndb.users.createIndex({email:1},{unique:true})"],
+["4. Mongoose (Node.js)","Mongoose schema deta hai taaki data structured rahe. Connection string .env me rakho, code me nahi.","Mongoose adds schemas and validation. Keep the URI in environment variables.","const mongoose=require('mongoose');\nawait mongoose.connect(process.env.MONGO_URI);\nconst User=mongoose.model('User',new mongoose.Schema({\n  name:{type:String,required:true},\n  email:{type:String,unique:true}},{timestamps:true}));\nawait User.create({name:'Ali',email:'a@x.com'});"]]};
+const NODE=[
+["1. Install + First server","Node.js JavaScript ko browser ke bahar chalata hai (V8 engine). LTS version install karo.","Node is a JS runtime built on V8. Install the LTS release and use npm.","node -v && npm init -y\n// server.js\nconst http=require('http');\nhttp.createServer((req,res)=>res.end('Hello')).listen(3000);"],
+["2. Event loop, async/await","Node single thread hai, par I/O non-blocking. Promise/async-await se code seedha padhne layak banta hai.","The event loop offloads I/O so one thread serves many requests. Never block it with heavy CPU work.","const fs=require('fs/promises');\nasync function main(){\n  try{ console.log(await fs.readFile('a.txt','utf8')); }\n  catch(e){ console.error(e.message); }\n}\nmain();"],
+["3. Express REST API","Express routes + middleware deta hai. Validation, error handler aur helmet/cors zaroor lagao.","Express handles routing and middleware. Add validation, central error handling, helmet, cors, rate limiting.","const express=require('express');\nconst app=express();\napp.use(express.json());\napp.get('/api/users/:id',(req,res)=>res.json({id:req.params.id}));\napp.use((err,req,res,next)=>res.status(500).json({error:'Server error'}));\napp.listen(process.env.PORT||3000);"],
+["4. JWT Auth + bcrypt","Password kabhi plain save mat karo, bcrypt se hash karo. Login par JWT token do.","Hash passwords with bcrypt; issue short-lived JWTs; verify them in middleware.","const hash=await bcrypt.hash(pw,12);\nconst ok=await bcrypt.compare(pw,user.hash);\nconst token=jwt.sign({id:user.id},process.env.JWT_SECRET,{expiresIn:'15m'});\nfunction auth(req,res,next){\n  try{req.user=jwt.verify((req.headers.authorization||'').split(' ')[1],process.env.JWT_SECRET);next()}\n  catch{res.sendStatus(401)}}"],
+["5. Deployment (PM2, Docker, Nginx)","Server par code daalo, .env set karo, PM2 se process zinda rakho, Nginx reverse proxy + HTTPS (certbot).","Run behind Nginx with HTTPS, keep the process alive with PM2 or Docker, log and monitor.","npm i -g pm2\npm2 start server.js -i max --name api\npm2 save && pm2 startup\n\n# Dockerfile\nFROM node:20-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci --omit=dev\nCOPY . .\nCMD [\"node\",\"server.js\"]"]];
+const REACT=[
+["1. React JS + Hooks","Component = UI ka tukda. useState data yaad rakhta hai, useEffect side-effects (API call) chalata hai.","Components are functions returning JSX. Hooks add state and lifecycle behavior.","import {useState,useEffect} from 'react';\nexport default function Users(){\n  const [list,setList]=useState([]);\n  useEffect(()=>{fetch('/api/users').then(r=>r.json()).then(setList)},[]);\n  return <ul>{list.map(u=><li key={u.id}>{u.name}</li>)}</ul>;\n}"],
+["2. Custom hook + Context","Repeat logic ko custom hook me daalo. Context se props drilling bachao.","Extract reusable logic into custom hooks; use Context for light global state.","function useFetch(url){\n  const [d,setD]=useState(null);\n  useEffect(()=>{fetch(url).then(r=>r.json()).then(setD)},[url]);\n  return d;\n}"],
+["3. Redux Toolkit","Badi app me global state Redux Toolkit se manage hoti hai: slice, store, useSelector, useDispatch.","RTK removes boilerplate: createSlice defines state and reducers together.","const counter=createSlice({name:'counter',initialState:{n:0},\n  reducers:{inc:s=>{s.n+=1}}});\nexport const {inc}=counter.actions;\nconst store=configureStore({reducer:{counter:counter.reducer}});\n// in component\nconst n=useSelector(s=>s.counter.n); const d=useDispatch(); d(inc());"],
+["4. Next.js (App Router)","Next.js React + routing + SEO + server rendering deta hai. Folder = route.","Next adds file-based routing, SSR/SSG and API routes. Deploy easily on Vercel.","npx create-next-app@latest\n// app/users/page.js  ->  /users\nexport default async function Page(){\n  const r=await fetch('https://api.x.com/users',{cache:'no-store'});\n  const users=await r.json();\n  return <ul>{users.map(u=><li key={u.id}>{u.name}</li>)}</ul>;\n}"],
+["5. React Native (Expo)","Ek hi JS code se Android + iOS app. Expo se shuru karo, EAS se Play Store/App Store build.","React Native renders native views. Use Expo for setup and EAS Build for store releases.","npx create-expo-app myapp && cd myapp && npx expo start\n\nimport {View,Text,Pressable} from 'react-native';\nexport default function App(){return <View style={{flex:1,justifyContent:'center'}}><Text>Hello</Text></View>}\n\n# release\nnpx eas build -p android"]];
+const ENG={Basic:[["Greetings","Hello, how are you? / I am fine, thank you. (Aap kaise ho? / Main theek hoon.)"],["Introduce yourself","My name is Ali. I am from Bhiwandi. I work as a developer."]],
+Intermediate:[["Daily talk","Could you please repeat that? (Kya aap dobara bol sakte hain?)"],["Opinions","In my opinion, this is a better solution because it is faster."]],
+Advanced:[["Interview","I have two years of experience building REST APIs with Node.js and MongoDB."],["Meeting","Let me walk you through the plan, and then we can discuss any concerns."]]};
+const TY={Beginner:"asdf jkl; fall dad sad lad ask flask salad",Easy:"The quick brown fox jumps over the lazy dog.",Medium:"Practice every day, because small steps build strong habits over time.",Advanced:"Great developers write clear code, test it carefully, and deploy it with confidence; speed comes from accuracy."};
+const cards=a=>a.map(c=>`<details><summary>${E(c[0])}</summary><b class="l">Roman Hindi</b><p class="hi">${E(c[1])}</p><b class="l">English</b><p class="en">${E(c[2])}</p><b class="l">Example</b><pre>${E(c[3])}</pre></details>`).join("");
+let sec="db",sub="SQL",lv="Easy",t0=0,done=0;
+const nav=(arr,cur,k)=>`<div class="hn">${arr.map(x=>`<button data-${k}="${x}" class="${x===cur?"on":""}">${x}</button>`).join("")}</div>`;
+function typ(){const s=TY[lv];$("#hub").querySelector("#hb").innerHTML=nav(Object.keys(TY),lv,"lv")+`<div class="tg"><div class="st"><div><b id="w">0</b>WPM</div><div><b id="a">100%</b>Accuracy</div><div><b id="tm">0s</b>Time</div></div><div class="tt" id="tt"></div><textarea class="ti" id="ti" placeholder="Start typing here…" autocomplete="off" spellcheck="false"></textarea><button class="b" id="tr">Restart</button></div>`+"<h3>Speaking lessons</h3>"+Object.keys(ENG).map(l=>`<details><summary>${l}</summary>${ENG[l].map(x=>`<p><b>${E(x[0])}:</b> ${E(x[1])}</p>`).join("")}<p class="hi">Tip: bol ke practice karo, phir apni recording sunke compare karo.</p></details>`).join("");t0=0;paint("");
+$("#ti").oninput=e=>{const v=e.target.value;if(!t0)t0=Date.now();paint(v)}}
+function paint(v){const s=TY[lv];let bad=0,h="";for(let i=0;i<s.length;i++){const c=E(s[i]);h+=i<v.length?(v[i]===s[i]?`<span class="ok">${c}</span>`:(bad++,`<span class="bad">${c}</span>`)):i===v.length?`<span class="cur">${c}</span>`:c}
+$("#tt").innerHTML=h;const m=t0?(Date.now()-t0)/60000:0,w=m>0?Math.round(v.length/5/m):0;$("#w").textContent=w;$("#a").textContent=v.length?Math.round((v.length-bad)/v.length*100)+"%":"100%";$("#tm").textContent=t0?Math.round(m*60)+"s":"0s";
+if(v.length>=s.length){$("#ti").disabled=true;$("#tm").textContent+=" ✓ done"}}
+function draw(){const H=$("#hub");H.querySelector("#hb").innerHTML="";
+if(sec==="db")H.querySelector("#hb").innerHTML=nav(Object.keys(DB),sub,"sb")+cards(DB[sub]);
+else if(sec==="node")H.querySelector("#hb").innerHTML=cards(NODE);
+else if(sec==="react")H.querySelector("#hb").innerHTML=cards(REACT);
+else typ()}
+const TABS=[["db","Databases"],["node","Node.js"],["react","React & Next"],["eng","English & Typing"]];
+const nv=$("#pgn");$("#pgn").insertAdjacentHTML("afterend",'<div id="hub" hidden><div id="hb"></div></div>');
+function adm(){return !document.body.classList.contains("auth-lock")&&$("#abA")&&!$("#abA").hidden}
+function sync(){nv.querySelectorAll("[data-hub]").forEach(b=>b.remove());const H=$("#hub");
+if(!adm()){H.hidden=true;return}
+nv.insertAdjacentHTML("beforeend",TABS.map(t=>`<button data-hub="${t[0]}">${t[1]} 🔒</button>`).join(""))}
+nv.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+if(b.dataset.hub){e.stopImmediatePropagation();if(!adm())return;sec=b.dataset.hub;
+["#pg1","#pg2","#pgx"].forEach(s=>{const n=$(s);if(n)n.hidden=true});$("#hub").hidden=false;
+nv.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));draw()}
+else $("#hub").hidden=true},true);
+$("#hub").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+if(b.dataset.sb){sub=b.dataset.sb;draw()}else if(b.dataset.lv){lv=b.dataset.lv;draw()}else if(b.id==="tr")draw()});
+new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:["class"]});
+new MutationObserver(sync).observe($("#abA"),{attributes:true,attributeFilter:["hidden"]});sync();
+})();
+</script>
+
 </body>
 </html>
