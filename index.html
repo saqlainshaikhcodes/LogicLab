@@ -2320,13 +2320,16 @@ document.addEventListener("mouseup",e=>{if(ctx&&!(e.target.closest&&e.target.clo
 document.addEventListener("scroll",()=>{if(ctx)hide()},true);
 /* ---- Tools dock: one floating window with a JavaScript compiler and SQL ---- */
 const isAdm=()=>!document.body.classList.contains("auth-lock")&&!!q("#abA")&&!q("#abA").hidden;
-const ADMCSS='html[data-adm="0"] .adm-only{display:none!important}[hidden]{display:none!important}';
+const ADMCSS='html[data-adm="0"] .adm-only{display:none!important}html[data-adm="1"] .usr-only{display:none!important}[hidden]{display:none!important}';
 const COMPCSS=`
 .cpc{display:flex;flex-direction:column;gap:8px;height:100%;min-height:0;font:14px/1.5 "Bricolage Grotesque",system-ui,sans-serif;color:var(--ink)}
 .cpc select,.cpc input.cpt,.cpc input.cpd{padding:8px 10px;border:1px solid var(--ln);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;min-width:0;width:100%}
 .cpc .cpadm{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px dashed var(--ln);border-radius:10px}
 .cpc .cpnote{font-size:12px;color:var(--mu)}
 .cpc .cph{display:flex;gap:6px}.cpc .cph select{flex:1}
+.cpc .cpusr{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px dashed var(--ln);border-radius:10px}
+.cpc .cpdesc{font-size:12.5px;color:var(--mu);white-space:pre-wrap;overflow-wrap:anywhere}.cpc .cpdesc:empty{display:none}
+.cpc select:disabled{opacity:.6;cursor:not-allowed}
 .cpc textarea.cpx{flex:1;min-height:150px;width:100%;resize:none;padding:10px 12px;border:1px solid var(--ln);border-radius:10px;background:var(--bg);color:var(--ink);font:13.5px/1.55 var(--mono);tab-size:2}
 .cpc textarea.cpx:focus{outline:2px solid var(--ac);outline-offset:0}
 .cpc pre.cpo{margin:0;flex:0 0 auto;min-height:56px;max-height:40%;overflow:auto;padding:10px 12px;border:1px solid var(--ln);border-radius:10px;background:var(--bg);font:13px/1.5 var(--mono);white-space:pre-wrap}
@@ -2379,25 +2382,88 @@ syncAdm();
 new MutationObserver(syncAdm).observe(document.body,{attributes:true,attributeFilter:["class"]});
 if(q("#abA"))new MutationObserver(syncAdm).observe(q("#abA"),{attributes:true,attributeFilter:["hidden"]});
 
+/* ---- Admin-published programs: the admin saves them here, users pick them in their OWN compiler ---- */
+const PK="ll:pubprog",PD="ll:pubdirty",TK="auth:gh",MAXC=50000,PREMOTE=/^https?:$/.test(location.protocol);
+let GHR="saqlainshaikhcodes/LogicLab";
+{const h=location.hostname,p=location.pathname.split("/")[1];if(/\.github\.io$/.test(h)&&p)GHR=h.split(".")[0]+"/"+p}
+const PAPI="https://api.github.com/repos/"+GHR+"/contents/programs.json";
+function sane(o){
+  const r={};if(!o||typeof o!=="object"||Array.isArray(o))return r;
+  Object.keys(o).forEach(k=>{const e=o[k];
+    if(!/^CP\d+$/.test(k)||!e||typeof e!=="object"||typeof e.c!=="string"||!e.c.trim()||e.c.length>MAXC)return;
+    r[k]={t:String(e.t||"Untitled").slice(0,120),c:e.c,n:String(e.n||"").slice(0,300),ts:+e.ts||0,u:String(e.u||"admin").slice(0,40)}});
+  return r}
+let PUB={};try{PUB=sane(JSON.parse(LS.get(PK)||"{}"))}catch(e){PUB={}}
+const savePub=()=>LS.set(PK,JSON.stringify(PUB));
+const pubList=()=>Object.keys(PUB).map(k=>({k,t:PUB[k].t,ts:PUB[k].ts})).sort((a,b)=>b.ts-a.ts);
+const who=()=>((q("#abN")||{}).textContent||"").trim()||"admin";
+const pubMsg=m=>inst.forEach(i=>{try{if(alive(i))i.msg(m)}catch(e){}});
+let pubVer=0,pubBusy=false,pubTimer=null,pubRetry=0,pulling=false;
+const later=ms=>{clearTimeout(pubTimer);pubTimer=setTimeout(publish,ms)};
+function pubChanged(){savePub();LS.set(PD,"1");pubVer++;pubRetry=0;later(800);refreshAll()}
+function publish(){
+  if(!isAdm())return;
+  if(!PREMOTE)return pubMsg("Saved on this device only. Open the live website to publish it for users.");
+  const tk=LS.get(TK);
+  if(!tk)return pubMsg("Saved on this device. To show it to users, save a GitHub token in Admin panel > Publish.");
+  if(pubBusy)return later(800);
+  pubBusy=true;const v=pubVer;pubMsg("Publishing…");
+  const hd={Authorization:"Bearer "+tk,Accept:"application/vnd.github+json"};
+  fetch(PAPI,{headers:hd,cache:"no-store"})
+    .then(r=>{if(r.status===404)return{};if(!r.ok)throw r.status;return r.json()})
+    .then(j=>{const b={message:"Update programs",content:btoa(unescape(encodeURIComponent(JSON.stringify(PUB,null,1))))};if(j.sha)b.sha=j.sha;
+      return fetch(PAPI,{method:"PUT",headers:Object.assign({"Content-Type":"application/json"},hd),body:JSON.stringify(b)})})
+    .then(r=>{if(!r.ok)throw r.status;pubBusy=false;pubRetry=0;
+      if(v!==pubVer)return later(300);
+      LS.set(PD,"0");pubMsg("Published at "+new Date().toLocaleTimeString()+". Users will see it in about a minute.")})
+    .catch(e=>{pubBusy=false;
+      if((e===409||e===422)&&pubRetry++<3){pubMsg("Publish conflict, retrying…");return later(1500)}
+      pubMsg(typeof e==="number"?"Publish failed (error "+e+"). Check the token and the repo permissions.":"Publish failed: no connection. It will stay saved on this device; press Save again to retry.")})}
+function pullPub(){
+  if(!PREMOTE||pulling||LS.get(PD)==="1")return Promise.resolve();
+  pulling=true;
+  const tk=isAdm()?LS.get(TK):null;
+  const req=tk?fetch(PAPI,{headers:{Authorization:"Bearer "+tk,Accept:"application/vnd.github.raw+json"},cache:"no-store"}):fetch("programs.json?t="+Date.now(),{cache:"no-store"});
+  return req.then(r=>r.ok?r.json():null).then(o=>{
+      if(o&&typeof o==="object"&&!Array.isArray(o)&&LS.get(PD)!=="1"){PUB=sane(o);savePub();refreshAll()}})
+    .catch(()=>{}).then(()=>{pulling=false})}
+/* older admin programs (CP… keys in My Logic) move into the published store once */
+function migrate(){
+  let n=0;
+  Object.keys(my).forEach(k=>{
+    if(!/^CP\d+$/.test(k)||PUB[k]||!my[k])return;
+    const s=sane({[k]:Object.assign({},my[k],{u:who()})})[k];
+    if(s){PUB[k]=s;delete my[k];n++}});
+  if(n){saveAll();pubChanged()}}
+
 function mountCompiler(root,o){
-  root.innerHTML=`<div class="cpc"><div class="cpadm adm-only"><div class="cpnote">Admin only: saved programs</div><div class="cph"><select class="cps" aria-label="Saved programs"></select><button type="button" data-c="new">New</button><button type="button" class="dg" data-c="del">Delete</button></div><input class="cpt" placeholder="Title (shown in the list)" aria-label="Title" maxlength="120"><input class="cpd" placeholder="Short description (optional)" aria-label="Description" maxlength="300"></div><textarea class="cpx" spellcheck="false" autocapitalize="off" aria-label="Code"></textarea><div class="cpb"><button type="button" class="p" data-c="run" title="Run (Ctrl+Enter)">Run</button><button type="button" class="adm-only" data-c="save">Save</button><button type="button" class="adm-only" data-c="saveas">Save as new</button>${o.noTable?"":'<button type="button" data-c="table" title="See every loop step in a table">Loop table</button>'}${o.noAc?"":'<label class="cpl"><input type="checkbox" class="cpsug"> Suggestions</label>'}</div><pre class="cpo" aria-live="polite">Your output will appear here. Press Run or Ctrl+Enter.</pre><div class="cpm" role="status" aria-live="polite"></div></div>`;
-  const $$=s=>root.querySelector(s),E={sel:$$(".cps"),t:$$(".cpt"),d:$$(".cpd"),x:$$(".cpx"),o:$$(".cpo"),m:$$(".cpm"),r:$$('[data-c="run"]')},wk="ll:cpw"+o.k;
+  root.innerHTML=`<div class="cpc"><div class="cpadm adm-only"><div class="cpnote">Admin only: programs you save here are published to all users</div><div class="cph"><select class="cps" aria-label="Saved programs"></select><button type="button" data-c="new">New</button><button type="button" class="dg" data-c="del">Delete</button></div><input class="cpt" placeholder="Title (shown in the list)" aria-label="Title" maxlength="120"><input class="cpd" placeholder="Short description (optional)" aria-label="Description" maxlength="300"></div><div class="cpusr usr-only"><div class="cpnote">Programs from your admin. Pick one to open it in your own compiler.</div><div class="cph"><select class="cpu" aria-label="Programs from admin"></select><button type="button" data-c="ureset" title="Load the admin's original again">Reset</button></div><div class="cpdesc" aria-live="polite"></div></div><textarea class="cpx" spellcheck="false" autocapitalize="off" aria-label="Code"></textarea><div class="cpb"><button type="button" class="p" data-c="run" title="Run (Ctrl+Enter)">Run</button><button type="button" class="adm-only" data-c="save">Save</button><button type="button" class="adm-only" data-c="saveas">Save as new</button>${o.noTable?"":'<button type="button" data-c="table" title="See every loop step in a table">Loop table</button>'}${o.noAc?"":'<label class="cpl"><input type="checkbox" class="cpsug"> Suggestions</label>'}</div><pre class="cpo" aria-live="polite">Your output will appear here. Press Run or Ctrl+Enter.</pre><div class="cpm" role="status" aria-live="polite"></div></div>`;
+  const $$=s=>root.querySelector(s),E={sel:$$(".cps"),usel:$$(".cpu"),info:$$(".cpdesc"),t:$$(".cpt"),d:$$(".cpd"),x:$$(".cpx"),o:$$(".cpo"),m:$$(".cpm"),r:$$('[data-c="run"]')},wk="ll:cpw"+o.k,
+    DEF='// Write any JavaScript here\nconsole.log("Hello Logic Lab");\n';
   let w={},id="",armed=false,running=false;
   try{w=JSON.parse(LS.get(wk)||"{}")||{}}catch(e){w={}}
-  id=w.id||"";
-  E.t.value=w.t||"";E.d.value=w.d||"";E.x.value=w.c||'// Write any JavaScript here\nconsole.log("Hello Logic Lab");\n';
+  id=typeof w.id==="string"?w.id:"";
+  E.t.value=w.t||"";E.d.value=w.d||"";E.x.value=typeof w.c==="string"&&w.c?w.c:DEF;
   const msg=m=>{E.m.textContent=m};
   const persist=()=>LS.set(wk,JSON.stringify({id,t:E.t.value,d:E.d.value,c:E.x.value}));
+  const rec=k=>(k&&(PUB[k]||my[k]))||null;
+  const ask=t=>{try{return (root.ownerDocument.defaultView||window).confirm(t)}catch(e){return true}};
   function fill(){
-    if(id&&!my[id])id="";
-    const l=Object.keys(my).map(k=>({k,t:my[k].t,ts:my[k].ts||0})).sort((a,b)=>b.ts-a.ts),g={};
-    l.forEach(e=>(g[grp(e.k)]=g[grp(e.k)]||[]).push(e));
+    if(isAdm())migrate();
+    if(id&&!rec(id))id="";
+    const pl=pubList(),opt=(k,t)=>`<option value="${esc(k)}">${esc(t||k)}</option>`,g={};
+    Object.keys(my).map(k=>({k,t:my[k].t,ts:my[k].ts||0})).sort((a,b)=>b.ts-a.ts).forEach(e=>(g[grp(e.k)]=g[grp(e.k)]||[]).push(e));
     let h='<option value="">New program (not saved)</option>';
-    ["Saved programs","Practice","Real-World","Other"].forEach(n=>{if(g[n])h+=`<optgroup label="${n}">`+g[n].map(e=>`<option value="${esc(e.k)}">${esc(e.t||e.k)}</option>`).join("")+"</optgroup>"});
-    E.sel.innerHTML=h;E.sel.value=id}
+    if(pl.length)h+='<optgroup label="Published to users">'+pl.map(e=>opt(e.k,e.t)).join("")+"</optgroup>";
+    ["Saved programs","Practice","Real-World","Other"].forEach(n=>{if(g[n])h+=`<optgroup label="${n}">`+g[n].map(e=>opt(e.k,e.t)).join("")+"</optgroup>"});
+    E.sel.innerHTML=h;E.sel.value=id;
+    E.usel.innerHTML=pl.length?'<option value="">Choose a program…</option>'+pl.map(e=>opt(e.k,e.t)).join(""):'<option value="">No programs from admin yet</option>';
+    E.usel.disabled=!pl.length;E.usel.value=PUB[id]?id:"";
+    const p=PUB[id];
+    E.info.textContent=p?(p.n?p.n+"\n":"")+"Shared by "+p.u+(p.ts?" · "+new Date(p.ts).toLocaleDateString():""):""}
   function load(k){
-    id=k&&my[k]?k:"";
-    if(id){E.t.value=my[id].t||"";E.d.value=my[id].n||"";E.x.value=my[id].c||""}
+    const r=rec(k);id=r?k:"";
+    if(r){E.t.value=r.t||"";E.d.value=r.n||"";E.x.value=r.c||""}
     else{E.t.value="";E.d.value="";E.x.value="// New program\n"}
     fill();persist()}
   async function run(){
@@ -2410,10 +2476,18 @@ function mountCompiler(root,o){
     const t=E.t.value.trim();
     if(!t){msg("Add a title first. It is the name shown in the list.");E.t.focus();return}
     if(!E.x.value.trim()){msg("The code is empty.");return}
-    const k=(!nw&&id&&my[id])?id:"CP"+Date.now();
-    my[k]={t,c:E.x.value,n:E.d.value.trim(),ts:Date.now()};saveAll();id=k;persist();refreshAll();
-    msg("Saved: "+t)}
-  E.sel.addEventListener("change",()=>{load(E.sel.value);msg(id?"Loaded: "+(my[id].t||id):"")});
+    if(E.x.value.length>MAXC){msg("The code is too long (max "+MAXC+" characters).");return}
+    const k=(!nw&&id&&PUB[id])?id:"CP"+Date.now();
+    PUB[k]={t:t.slice(0,120),c:E.x.value,n:E.d.value.trim().slice(0,300),ts:Date.now(),u:who()};
+    id=k;persist();pubChanged();msg("Saved: "+t)}
+  E.sel.addEventListener("change",()=>{load(E.sel.value);msg(id?"Loaded: "+(rec(id).t||id):"")});
+  E.usel.addEventListener("change",()=>{
+    const k=E.usel.value;
+    if(!k){id="";fill();persist();msg("");return}
+    if(!PUB[k]){fill();return}
+    const base=PUB[id]?PUB[id].c:DEF;
+    if(E.x.value.trim()&&E.x.value!==base&&!ask("Your current code will be replaced by this program. Continue?")){E.usel.value=PUB[id]?id:"";return}
+    load(k);msg("Loaded: "+PUB[k].t+". This is your own copy; your changes do not affect the admin's version.")});
   [E.t,E.d,E.x].forEach(el=>el.addEventListener("input",persist));
   let tabOut=false;
   E.x.addEventListener("keydown",e=>{
@@ -2429,15 +2503,18 @@ function mountCompiler(root,o){
     else if(a==="save")save(false);
     else if(a==="saveas")save(true);
     else if(a==="new"){load("");msg("Started a new program.")}
+    else if(a==="ureset"){if(PUB[id]){if(E.x.value===PUB[id].c||ask("Your changes will be replaced by the admin's original. Continue?")){load(id);msg("Reset to the admin's original.")}}else msg("Choose a program from the list first.")}
     else if(a==="table"){tryCode(E.x.value);if(o.k==="fl")collapse()}
     else if(a==="del"){
       if(!isAdm())return;
-      if(!id||!my[id])return msg("Pick a saved program from the list first.");
+      if(!id||!rec(id))return msg("Pick a saved program from the list first.");
       if(!armed){armed=true;b.textContent="Confirm?";setTimeout(()=>{armed=false;b.textContent="Delete"},3000);return}
-      armed=false;b.textContent="Delete";const t=my[id].t;delete my[id];saveAll();load("");refreshAll();msg("Deleted: "+t)}});
+      armed=false;b.textContent="Delete";const t=rec(id).t;
+      if(PUB[id]){delete PUB[id];load("");pubChanged()}else{delete my[id];saveAll();load("");refreshAll()}
+      msg("Deleted: "+t)}});
   const ca=$$(".cpsug");
   if(ca){ca.checked=on;ca.addEventListener("change",()=>{on=ca.checked;LS.set("ll:ac",on?"1":"0");if(!on)hide()})}
-  inst.push({root,fill});fill();syncAdm();
+  inst.push({root,fill,msg});fill();syncAdm();
 }
 function popOut(){
   const w=window.open("","logiclab-compiler","width=920,height=740");
@@ -2527,6 +2604,11 @@ function dock(){
 }
 document.addEventListener("click",e=>{const b=e.target.closest("[data-cpo]");if(!b)return;b.dataset.cpo==="fl"?openF("js"):popOut()});
 dock();
+if(PREMOTE){
+  pullPub();setInterval(pullPub,120000);
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)pullPub()});
+}
+if(q("#abA"))new MutationObserver(()=>{refreshAll();pullPub()}).observe(q("#abA"),{attributes:true,attributeFilter:["hidden"]});
 })();
 </script>
 <style id="ux-css">
