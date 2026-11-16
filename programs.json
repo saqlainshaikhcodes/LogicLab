@@ -12,5 +12,12 @@
   "n": "Employee Management: Department-wise highest salary custom way and advance way",
   "ts": 1794853641592,
   "u": "ADMIN111"
+ },
+ "CP1794853670174": {
+  "t": "Employee Management: Department-wise  salary  sum custom way and advance way",
+  "c": "const employees = [\n  { id: 1, name: \"A\", department: \"IT\", salary: 80000 },\n  { id: 2, name: \"B\", department: \"HR\", salary: 50000 },\n  { id: 3, name: \"C\", department: \"IT\", salary: 100000 },\n  { id: 4, name: \"D\", department: \"HR\", salary: 70000 },\n  { id: 5, name: \"E\", department: \"Finance\", salary: 90000 },\n  { id: 6, name: \"F\", department: \"IT\", salary: 120000 }\n];\n\n\nconst highestSalary = (data) => {\n  let output = [];\n\n  for (let i = 0; i < data.length; i++) {\n\n    let found = false;\n\n    for (let j = 0; j < output.length; j++) {\n\n      if (data[i].department === output[j].department) {\n\n        found = true;\n\n        if (data[i].salary > output[j].salary) {\n          output[j] = {\n            department: data[i].department,\n            name: data[i].name,\n            salary: data[i].salary\n          };\n        }\n      }\n    }\n\n    if (found === false) {\n      output[output.length] = {\n        department: data[i].department,\n        name: data[i].name,\n        salary: data[i].salary\n      };\n    }\n  }\n\n  return output;\n};\n\n\nconsole.log('-->',highestSalary(employees))",
+  "n": "Employee Management: Department-wise salary  sum custom way and advance way",
+  "ts": 1794853670174,
+  "u": "ADMIN111"
  }
 }
