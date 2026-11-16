@@ -1,1 +1,9 @@
-{}
+{
+ "CP1794846967913": {
+  "t": "Find active Gold users from Mumbai for custom way and advance way",
+  "c": "// New program \nconst users = [\n  {\n    id: 1,\n    name: \"Rahul\",\n    age: 25,\n    city: \"Mumbai\",\n    isActive: true,\n    subscription: \"Gold\",\n    skills: [\"React Native\", \"Node.js\"]\n  },\n  {\n    id: 2,\n    name: \"Aman\",\n    age: 22,\n    city: \"Pune\",\n    isActive: false,\n    subscription: \"Free\",\n    skills: [\"JavaScript\", \"React\"]\n  },\n  {\n    id: 3,\n    name: \"Sara\",\n    age: 24,\n    city: \"Mumbai\",\n    isActive: true,\n    subscription: \"Premium\",\n    skills: [\"React Native\", \"Firebase\"]\n  },\n  {\n    id: 1,\n    name: \"saitama\",\n    age: 25,\n    city: \"Mumbai\",\n    isActive: true,\n    subscription: \"Gold\",\n    skills: [\"React Native\", \"Node.js\"]\n  },\n\n];\nconst activeGoldUserFromMumbai = () => {\nlet filterUser = users.filter((e,i) => e.city == \"Mumbai\" && e.isActive == true && e.subscription == 'Gold')\nreturn filterUser\n\nlet returnArray = []\nfor (let i = 0; i < users.length; i++) {\n  if (users[i].city == \"Mumbai\" && users[i].isActive == true && users[i].subscription == 'Gold') {\n    returnArray[returnArray.length] =  users[i]\n  }\n}\nreturn returnArray \n}\nconsole.log('---->>',activeGoldUserFromMumbai(users))\n",
+  "n": "Find active Gold users from Mumbai for custom way and advance way",
+  "ts": 1794846967913,
+  "u": "ADMIN111"
+ }
+}
