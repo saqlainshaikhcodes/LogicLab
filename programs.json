@@ -12,5 +12,12 @@
   "n": "SUM ALL",
   "ts": 1794845668846,
   "u": "ADMIN111"
+ },
+ "CP1794845681078": {
+  "t": "SUM ALLdd",
+  "c": "// New program\nlet a = [13,3,4,5]\nlet sum = 0 \nfor (let i = 0; i < a.length; i++) {\n  sum = sum + a[i]\n}\nconsole.log(sum)",
+  "n": "SUM ALLdddd",
+  "ts": 1794845681078,
+  "u": "ADMIN111"
  }
 }
